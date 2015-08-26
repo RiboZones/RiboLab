@@ -1,0 +1,1298 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Map2D</title><meta name="generator" content="MATLAB 7.14"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-08-15"><meta name="DC.source" content="Map2D.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="keyword">classdef</span> Map2D &lt; handle
+    <span class="comment">%UNTITLED3 Summary of this class goes here</span>
+    <span class="comment">%   Detailed explanation goes here</span>
+
+    <span class="keyword">properties</span>
+        Name=<span class="string">'un-named'</span>
+        ItemNames
+        X
+        Y
+        Other
+        TextLabels
+        LineLabels
+    <span class="keyword">end</span>
+
+    <span class="keyword">methods</span>
+        <span class="keyword">function</span> map_object = Map2D(name,fullfilepath,varargin)
+            <span class="keyword">if</span> nargin &gt; 0
+                map_object.Name  = name;
+            <span class="keyword">end</span>
+            <span class="keyword">if</span> nargin &gt; 1
+                map_object.AddMap(fullfilepath,varargin{:});
+                map_object.Transform(varargin{:});
+                map_object.PlotCoord(varargin{:},<span class="string">'filename'</span>,[map_object.Name,<span class="keyword">...</span>
+                    <span class="string">'_Def.eps'</span>]);
+                map_object.CountourLine(varargin{:},<span class="string">'filename'</span>,[map_object.Name,<span class="keyword">...</span>
+                    <span class="string">'_Def_Contour.eps'</span>]);
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> AddMap(map_object,fullfilepath,varargin)
+            height_fig=792;
+            FontSize=<span class="string">'3.9'</span>;
+
+
+            <span class="keyword">if</span> nargin &gt; 1
+                <span class="keyword">for</span> ind=1:length(varargin)/2
+                    <span class="keyword">switch</span> varargin{2*ind-1}
+                        <span class="keyword">case</span> <span class="string">'height_fig'</span>
+                            height_fig=varargin{2*ind};
+                        <span class="keyword">case</span> <span class="string">'DataPointNames'</span>
+                            DataPointNames=varargin{2*ind};
+                        <span class="keyword">case</span> <span class="string">'FontSize'</span>
+                            FontSize=varargin{2*ind};
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+
+            [~,~,file_ext] = fileparts(fullfilepath);
+            <span class="keyword">switch</span> file_ext
+                <span class="keyword">case</span> <span class="string">'.csv'</span>
+                    textfile=fileread(fullfilepath);
+                    ParsedText=regexp(textfile,<span class="string">'(?&lt;ItemName&gt;[\d\w]+),(?&lt;Letter&gt;\w),(?&lt;X&gt;[^,]+),(?&lt;Y&gt;[^,\s]+)'</span>,<span class="string">'names'</span>);
+                    numTextLabels=length(ParsedText);
+                    Text_Labels_Struct=repmat(struct(<span class="string">'ItemName'</span>,<span class="string">''</span>,<span class="string">'LabelText'</span>,<span class="string">''</span>,<span class="string">'X'</span>,<span class="string">''</span>,<span class="string">'Y'</span>,<span class="string">''</span>,<span class="string">'Font'</span>,<span class="string">'MyriadPro-Regular'</span>,<span class="string">'FontSize'</span>,num2str(FontSize),<span class="string">'FontColor'</span>,[0,0,0],<span class="string">'Fill'</span>,<span class="string">'#000000'</span>),numTextLabels,1);
+
+                    <span class="keyword">for</span> i=1:numTextLabels
+                        Text_Labels_Struct(i).Matrix=[1,0,0,1,str2double(ParsedText(i).X),str2double(ParsedText(i).Y)];
+                        Text_Labels_Struct(i).X=Text_Labels_Struct(i).Matrix(5);
+                        Text_Labels_Struct(i).Y=Text_Labels_Struct(i).Matrix(6);
+                        Text_Labels_Struct(i).ItemName=ParsedText(i).ItemName;
+                        Text_Labels_Struct(i).LabelText=ParsedText(i).Letter;
+                    <span class="keyword">end</span>
+
+                <span class="keyword">case</span> <span class="string">'.xrna'</span>
+                    textfile=fileread(fullfilepath);
+                    ParsedText=regexp(textfile,<span class="string">'(?&lt;Letter&gt;[ACGUT]) (?&lt;X&gt;[^\s]+) (?&lt;Y&gt;[^\s]+)'</span>,<span class="string">'names'</span>);
+                    numTextLabels=length(ParsedText);
+                    Text_Labels_Struct=repmat(struct(<span class="string">'ItemName'</span>,<span class="string">''</span>,<span class="string">'LabelText'</span>,<span class="string">''</span>,<span class="string">'X'</span>,<span class="string">''</span>,<span class="string">'Y'</span>,<span class="string">''</span>,<span class="string">'Font'</span>,<span class="string">'MyriadPro-Regular'</span>,<span class="string">'FontSize'</span>,num2str(FontSize),<span class="string">'FontColor'</span>,[0,0,0],<span class="string">'Fill'</span>,<span class="string">'#000000'</span>),numTextLabels,1);
+
+                    <span class="keyword">if</span> exist(<span class="string">'DataPointNames'</span>,<span class="string">'var'</span>) &amp;&amp; ischar(DataPointNames) &amp;&amp; exist(DataPointNames,<span class="string">'file'</span>)
+                        textfile=fileread(DataPointNames);
+                        DataPointNames=regexp(textfile,<span class="string">'[\w]*'</span>,<span class="string">'match'</span>);
+                    <span class="keyword">end</span>
+
+                    <span class="keyword">if</span> ~exist(<span class="string">'DataPointNames'</span>,<span class="string">'var'</span>)
+                        DataPointNames=strtrim(cellstr(num2str((1:numTextLabels)')));
+                    <span class="keyword">end</span>
+
+                    <span class="keyword">for</span> i=1:numTextLabels
+                        Text_Labels_Struct(i).Matrix=[1,0,0,1,str2double(ParsedText(i).X),str2double(ParsedText(i).Y)];
+                        Text_Labels_Struct(i).X=Text_Labels_Struct(i).Matrix(5);
+                        Text_Labels_Struct(i).Y=Text_Labels_Struct(i).Matrix(6);
+                        Text_Labels_Struct(i).ItemName=DataPointNames{i};
+                        Text_Labels_Struct(i).LabelText=ParsedText(i).Letter;
+                    <span class="keyword">end</span>
+
+
+                <span class="keyword">case</span> <span class="string">'.svg'</span>
+                    SVGdata=fileread(fullfilepath);
+
+                    ParsedText=regexp(SVGdata,[<span class="string">'&lt;text( id="[^"]*")? transform="matrix\((?&lt;transform&gt;[\d|\s|\.]+)\)" '</span>,<span class="keyword">...</span>
+                        <span class="string">'fill="(?&lt;fill&gt;[^"]+)" font-family="''(?&lt;font_family&gt;[^'']+)''" font-size="(?&lt;font_size&gt;[^"]+)"'</span>,<span class="keyword">...</span>
+                        <span class="string">'&gt;(?&lt;LabelText&gt;[^&lt;]+)&lt;/text&gt;'</span>],<span class="string">'tokens'</span>);
+                    numTextLabels=length(ParsedText);
+                    Text_Labels_Struct=repmat(struct(<span class="string">'ItemName'</span>,<span class="string">''</span>,<span class="string">'LabelText'</span>,<span class="string">''</span>,<span class="string">'X'</span>,<span class="string">''</span>,<span class="string">'Y'</span>,<span class="string">''</span>,<span class="string">'Font'</span>,<span class="string">''</span>,<span class="string">'FontSize'</span>,<span class="string">''</span>,<span class="string">'FontColor'</span>,[0,0,0],<span class="string">'Fill'</span>,<span class="string">'#000000'</span>),numTextLabels,1);
+
+
+                    <span class="keyword">if</span> exist(<span class="string">'DataPointNames'</span>,<span class="string">'var'</span>) &amp;&amp; ischar(DataPointNames) &amp;&amp; exist(DataPointNames,<span class="string">'file'</span>)
+                        textfile=fileread(DataPointNames);
+                        DataPointNames=regexp(textfile,<span class="string">'[\w]*'</span>,<span class="string">'match'</span>);
+                    <span class="keyword">end</span>
+
+                    <span class="keyword">if</span> ~exist(<span class="string">'DataPointNames'</span>,<span class="string">'var'</span>)
+                        DataPointNames=strtrim(cellstr(num2str((1:numTextLabels)')));
+                    <span class="keyword">end</span>
+
+                    <span class="keyword">for</span> i=1:numTextLabels
+                        Text_Labels_Struct(i).Matrix=str2num(ParsedText{i}{2}); <span class="comment">%#ok&lt;ST2NM&gt;</span>
+                        Text_Labels_Struct(i).X=Text_Labels_Struct(i).Matrix(5);
+                        Text_Labels_Struct(i).Y=height_fig-Text_Labels_Struct(i).Matrix(6);
+                        Text_Labels_Struct(i).ItemName=DataPointNames{i};
+                        Text_Labels_Struct(i).LabelText=ParsedText{i}{6};
+                        Text_Labels_Struct(i).Letter=Text_Labels_Struct(i).LabelText;
+                        Text_Labels_Struct(i).Font=ParsedText{i}{4};
+                        Text_Labels_Struct(i).FontSize=str2double(ParsedText{i}{5});
+                        fill=ParsedText{i}{3}(2:end);
+                        <span class="keyword">if</span> strcmp(fill,<span class="string">'none'</span>)
+                            Text_Labels_Struct(i).FontColor=[0,0,0];
+                        <span class="keyword">else</span>
+                            Text_Labels_Struct(i).FontColor=[hex2dec(fill(1:2)),hex2dec(fill(3:4)),hex2dec(fill(5:6))]/256;
+                        <span class="keyword">end</span>
+                        Text_Labels_Struct(i).Fill=ParsedText{i}{3};
+                    <span class="keyword">end</span>
+            <span class="keyword">end</span>
+
+            map_object.AddMapStruct(Text_Labels_Struct);
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> AddMapStruct(map_object,DataStruct)
+            map_object.ItemNames={DataStruct(:).ItemName}';
+            map_object.X=[DataStruct(:).X]';
+            map_object.Y=[DataStruct(:).Y]';
+            map_object.Other=DataStruct;
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> Transform(map_object,varargin)
+            molecule=<span class="string">'23S'</span>;
+            <span class="comment">%             alignResi='562';</span>
+            scale_fact=0.5;
+            noTransform=false();
+
+            <span class="keyword">if</span> nargin &gt; 1
+                <span class="keyword">for</span> ind=1:length(varargin)/2
+                    <span class="keyword">switch</span> varargin{2*ind-1}
+                        <span class="keyword">case</span> <span class="string">'molecule'</span>
+                            molecule=varargin{2*ind};
+
+                        <span class="keyword">case</span> <span class="string">'alignResi'</span>
+                            alignResi=varargin{2*ind};
+                            <span class="comment">%                         case 'toPos'</span>
+                            <span class="comment">%                             toPos=varargin{2*ind};</span>
+                        <span class="keyword">case</span> <span class="string">'scale_fact'</span>
+                            scale_fact=varargin{2*ind};
+                        <span class="keyword">case</span> <span class="string">'noTransform'</span>
+                            noTransform=varargin{2*ind};
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+
+            <span class="keyword">if</span> noTransform
+                <span class="keyword">return</span>
+            <span class="keyword">end</span>
+
+            <span class="keyword">switch</span> lower(molecule)
+                <span class="keyword">case</span> <span class="string">'23s'</span>
+                    toPos=[356.5340,408.675];
+                <span class="keyword">case</span> <span class="string">'16s'</span>
+                    toPos=[316.553,404.6670];
+                <span class="keyword">case</span> <span class="string">'5s'</span>
+                    toPos=[106.226,198.2240];
+            <span class="keyword">end</span>
+            <span class="keyword">if</span> ~exist(<span class="string">'alignResi'</span>,<span class="string">'var'</span>)
+                <span class="keyword">switch</span> lower(molecule)
+                    <span class="keyword">case</span> <span class="string">'23s'</span>
+                        alignResi=<span class="string">'562'</span>;
+                    <span class="keyword">case</span> <span class="string">'16s'</span>
+                        alignResi=<span class="string">'1400'</span>;
+                    <span class="keyword">case</span> <span class="string">'5s'</span>
+                        alignResi=<span class="string">'20'</span>;
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+            map_object.X=map_object.X*scale_fact;
+            map_object.Y=map_object.Y*scale_fact;
+
+            [~,I]=ismember(alignResi,map_object.ItemNames);
+            map_object.X=map_object.X + (toPos(1) - map_object.X(I));
+            map_object.Y=map_object.Y + (toPos(2) - map_object.Y(I));
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> CountourLine(map_object,varargin)
+            map_object.PlotCoord(<span class="string">'shape'</span>,<span class="string">'contour'</span>,<span class="string">'x_corr'</span>,-.442,<span class="string">'y_corr'</span>,1.27,varargin{:});
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> PrintCoord(map_object,IncludeItems)
+            <span class="keyword">if</span> nargin &gt; 1
+                [~,I]=ismember(IncludeItems,map_object.ItemNames);
+                disp([map_object.X(I),map_object.Y(I)])
+            <span class="keyword">else</span>
+                disp([map_object.X,map_object.Y])
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> Coord=GetCoord(map_object,IncludeItems)
+            <span class="keyword">if</span> nargin &gt; 1
+                numPoints=size(IncludeItems,2);
+                Coord=cell(numPoints,1);
+
+                <span class="keyword">for</span> j=1:numPoints
+                    <span class="comment">%                 Keep=false(length(map_object.ItemNames),1);</span>
+                    [~,II]=ismember(IncludeItems(:,j),map_object.ItemNames);
+                    Keep=II;
+                    Keep(Keep==0)=[];
+                    <span class="keyword">if</span> Keep==0
+                        Coord{j}=[];
+
+                    <span class="keyword">else</span>
+                        Coord{j}=[map_object.X(Keep),map_object.Y(Keep)];
+                    <span class="keyword">end</span>;
+                <span class="keyword">end</span>
+            <span class="keyword">else</span>
+                Coord=[map_object.X,map_object.Y];
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> [Table]=BasicTable(myMap,pdb_obj,varargin)
+
+            <span class="comment">%             startIndex=0;</span>
+            numResi=length(vertcat(myMap.ItemNames));
+            numMaps=length(myMap);
+            letter=cell(numMaps,1);
+            xtal_index=cell(numMaps,1);
+            chain_letter=cell(numMaps,1);
+
+            Table=cell(numResi,7);
+            Table(:,1)=num2cell(1:numResi);
+            Table(:,2)=vertcat(myMap.ItemNames);
+            <span class="keyword">for</span> i=1:numMaps
+                letter{i}={myMap(i).Other.Letter}';
+                d=regexp(unique(pdb_obj(i).UniqueResSeq),<span class="string">'(.)_[\s]*([\w]+)'</span>,<span class="string">'tokens'</span>);
+                d=[d{:}];
+                residue_Chain_list=vertcat(d{:});
+                residue_list=residue_Chain_list(:,2);
+                chain_list=residue_Chain_list(:,1);
+                <span class="comment">%                 xtalindex=startIndex + (1:length(residue_list));</span>
+                xtalindex=1:length(residue_list);
+
+                [inMap,I]=ismember(residue_list,myMap(i).ItemNames);
+                [~,II]=sort(I(I~=0));
+                r=residue_list(inMap);
+                [~,III]=ismember(r(II),myMap(i).ItemNames);
+
+                <span class="comment">%                 xtal_index{i}=num2cell(zeros(length(myMap(i).ItemNames),1));</span>
+                xtal_index{i}=cell(length(myMap(i).ItemNames),1);
+                chain_letter{i}=cell(length(myMap(i).ItemNames),1);
+                xtal_index{i}(III)=num2cell(xtalindex(II));
+                chain_letter{i}(III)=chain_list(II);
+                <span class="comment">%                 startIndex=startIndex + length(residue_list);</span>
+            <span class="keyword">end</span>
+            Table(:,3)=vertcat(letter{:});
+            Table(:,4)=vertcat(chain_letter{:});
+            Table(:,5)=num2cell(vertcat(myMap.X));
+            Table(:,6)=num2cell(vertcat(myMap.Y));
+            Table(:,7)=vertcat(xtal_index{:});
+
+
+
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> [All_Table,TextTable,LineTable]=TableLabels(map_object,varargin)
+
+            numTextLabels=length(map_object.TextLabels);
+            TextTable=cell(numTextLabels,6);
+            TextTable(:,1)={map_object.TextLabels(:).LabelText};
+            TextTable(:,2)={map_object.TextLabels(:).X};
+            TextTable(:,3)={map_object.TextLabels(:).Y};
+            TextTable(:,4)={map_object.TextLabels(:).Font};
+            TextTable(:,5)={map_object.TextLabels(:).FontSize};
+            TextTable(:,6)={map_object.TextLabels(:).Fill};
+
+            numLineLabels=length(map_object.LineLabels);
+            LineTable=cell(numLineLabels,9);
+            LineTable(:,1)={map_object.LineLabels(:).X1};
+            LineTable(:,2)={map_object.LineLabels(:).Y1};
+            LineTable(:,3)={map_object.LineLabels(:).X2};
+            LineTable(:,4)={map_object.LineLabels(:).Y2};
+            LineTable(:,5)={map_object.LineLabels(:).Fill};
+            LineTable(:,6)={map_object.LineLabels(:).Stroke};
+            LineTable(:,7)={map_object.LineLabels(:).Stroke_Width};
+            LineTable(:,8)={map_object.LineLabels(:).Stroke_Linejoin};
+            LineTable(:,9)={map_object.LineLabels(:).Stroke_Miterlimit};
+
+            All_Table.Text=TextTable;
+            All_Table.Line=LineTable;
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> PlotLabels(map_object,varargin)
+            width_fig=612;
+            height_fig=792;
+            Orientation=<span class="string">'portrait'</span>;
+
+            width_shape=10;
+            height_shape=10;
+
+
+
+
+            <span class="keyword">if</span> nargin &gt; 1
+                <span class="keyword">for</span> ind=1:length(varargin)/2
+                    <span class="keyword">switch</span> varargin{2*ind-1}
+                        <span class="keyword">case</span> <span class="string">'Orientation'</span>
+                            Orientation=varargin{2*ind};
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+
+
+
+
+
+            <span class="keyword">if</span> strcmpi(Orientation,<span class="string">'landscape'</span>)
+                <span class="keyword">if</span> width_fig &lt; height_fig
+                    old_width_fig=width_fig;
+                    width_fig=height_fig;
+                    height_fig=old_width_fig;
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+            <span class="comment">%             x_corr=0;</span>
+            <span class="comment">%             y_corr=0;</span>
+
+            numLabels=length(map_object.TextLabels);
+            h=figure();
+            set(h,<span class="string">'Units'</span>,<span class="string">'points'</span>)
+            set(h,<span class="string">'Position'</span>,[2200,-50,width_fig,height_fig])
+
+            <span class="keyword">for</span> i=1:numLabels
+                Ah{i}=annotation(<span class="string">'textbox'</span>,[(map_object.TextLabels(i).X)/width_fig,<span class="keyword">...</span>
+                    (height_fig-map_object.TextLabels(i).Y)/height_fig,width_shape/width_fig,<span class="keyword">...</span>
+                    height_shape/height_fig],<span class="string">'String'</span>,map_object.TextLabels(i).LabelText,<span class="string">'LineStyle'</span>,<span class="keyword">...</span>
+                    <span class="string">'none'</span>,<span class="string">'Margin'</span>,0,<span class="string">'HorizontalAlignment'</span>,<span class="string">'center'</span>,<span class="keyword">...</span>
+                    <span class="string">'VerticalAlignment'</span>,<span class="string">'bottom'</span>,<span class="string">'FontSize'</span>,map_object.TextLabels(i).FontSize,<span class="keyword">...</span>
+                    <span class="string">'Color'</span>,map_object.TextLabels(i).FontColor);
+            <span class="keyword">end</span>
+            <span class="comment">%             map_object.PlotCoord('shape','text')</span>
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> PlotCoord(map_object,varargin)
+            width_fig=612;
+            height_fig=792;
+            width_shape=3.333;
+            height_shape=3.333;
+            LetterHeight=4.239;
+            <span class="comment">%             TextLabels=map_object.ItemNames;</span>
+            IncludeItems=map_object.ItemNames;
+            NewFontSize=8;
+            shape=<span class="string">'ellipse'</span>;
+            Orientation=<span class="string">'portrait'</span>;
+            ColorMapType=<span class="string">'jet'</span>;
+            ColorMode=<span class="string">'MonoChrome'</span>;
+            EnableColorBar=true();
+            MaxItems=500;
+            <span class="comment">%             ColorValue=[1,1,1];</span>
+            <span class="comment">%             ColorMapIndex=1;</span>
+
+            <span class="keyword">if</span> nargin &gt; 1
+                <span class="keyword">for</span> ind=1:length(varargin)/2
+                    <span class="keyword">switch</span> varargin{2*ind-1}
+                        <span class="keyword">case</span> <span class="string">'EnableColorBar'</span>
+                            EnableColorBar=varargin{2*ind};
+                        <span class="keyword">case</span> <span class="string">'width_fig'</span>
+                            width_fig=varargin{2*ind};
+                        <span class="keyword">case</span> <span class="string">'height_fig'</span>
+                            height_fig=varargin{2*ind};
+                        <span class="keyword">case</span> <span class="string">'width_shape'</span>
+                            width_shape=varargin{2*ind};
+                        <span class="keyword">case</span> <span class="string">'height_shape'</span>
+                            height_shape=varargin{2*ind};
+                        <span class="keyword">case</span> <span class="string">'LetterHeight'</span>
+                            LetterHeight=varargin{2*ind};
+                        <span class="keyword">case</span> <span class="string">'x_corr'</span>
+                            x_corr=varargin{2*ind};
+                        <span class="keyword">case</span> <span class="string">'y_corr'</span>
+                            y_corr=varargin{2*ind};
+                        <span class="keyword">case</span> <span class="string">'shape'</span>
+                            shape=varargin{2*ind};
+                            <span class="comment">%                         case 'TextLabels'</span>
+                            <span class="comment">%                             TextLabels=varargin{2*ind};</span>
+                        <span class="keyword">case</span> <span class="string">'IncludeItems'</span>
+                            IncludeItems=varargin{2*ind};
+                        <span class="keyword">case</span> <span class="string">'LineWidth'</span>
+                            LineWidth=varargin{2*ind};
+                        <span class="keyword">case</span> <span class="string">'DesiredFontSize'</span>
+                            NewFontSize=varargin{2*ind};
+                        <span class="keyword">case</span> <span class="string">'filename'</span>
+                            file_name=varargin{2*ind};
+                        <span class="keyword">case</span> <span class="string">'Orientation'</span>
+                            Orientation=varargin{2*ind};
+                        <span class="keyword">case</span> <span class="string">'ColorMap'</span>
+                            ColorMapType=varargin{2*ind};
+                        <span class="keyword">case</span> <span class="string">'ColorMode'</span>
+                            ColorMode=varargin{2*ind};
+                        <span class="keyword">case</span> <span class="string">'ColorValue'</span>
+                            ColorValue=varargin{2*ind};
+                        <span class="keyword">case</span> <span class="string">'ColorMapIndex'</span>
+                            ColorMapIndex=varargin{2*ind};
+                        <span class="keyword">case</span> <span class="string">'VarInterest'</span>
+                            <span class="keyword">if</span> iscell(varargin{2*ind})
+                                VarInterest=varargin{2*ind}{1};
+                                m=varargin{2*ind}{2};
+                            <span class="keyword">else</span>
+                                VarInterest=varargin{2*ind};
+                                m=minmax(VarInterest);
+                            <span class="keyword">end</span>
+                            GradientMap=round(63*(VarInterest - m(1))/(m(2)-m(1)) + 1);
+                        <span class="keyword">case</span> <span class="string">'MaxItems'</span>
+                            MaxItems=varargin{2*ind};
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+
+            <span class="keyword">if</span> strcmpi(Orientation,<span class="string">'landscape'</span>)
+                <span class="keyword">if</span> width_fig &lt; height_fig
+                    old_width_fig=width_fig;
+                    width_fig=height_fig;
+                    height_fig=old_width_fig;
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+
+            <span class="keyword">switch</span> shape
+                <span class="keyword">case</span> {<span class="string">'line'</span>,<span class="string">'contour'</span>}
+                    width_shape=0;
+                    height_shape=0;
+            <span class="keyword">end</span>
+
+
+
+            <span class="keyword">if</span> ~exist(<span class="string">'x_corr'</span>,<span class="string">'var'</span>)
+                <span class="keyword">switch</span> Orientation
+                    <span class="keyword">case</span> <span class="string">'landscape'</span>
+                        x_corr=-0.6620-width_shape/2; <span class="comment">% (old map, new way)</span>
+                    <span class="keyword">case</span> <span class="string">'portrait'</span>
+                        x_corr=-.965-width_shape/2; <span class="comment">% (New map)</span>
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+
+            <span class="keyword">if</span> ~exist(<span class="string">'y_corr'</span>,<span class="string">'var'</span>)
+                <span class="keyword">switch</span> Orientation
+                    <span class="keyword">case</span> <span class="string">'landscape'</span>
+                        y_corr= 0.9-height_shape/2;
+                    <span class="keyword">case</span> <span class="string">'portrait'</span>
+                        y_corr=1.8-height_shape/2 ;
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+
+            numPoints=size(IncludeItems,2);
+            Coord=cell(numPoints,1);
+
+            <span class="keyword">for</span> j=1:numPoints
+                <span class="comment">%                 Keep=false(length(map_object.ItemNames),1);</span>
+                [inMap,II]=ismember(IncludeItems(:,j),map_object.ItemNames);
+                Keep=II;
+                Keep(Keep==0)=[];
+                <span class="keyword">if</span> Keep==0
+                    Coord{j}=[];
+
+                <span class="keyword">else</span>
+                    Coord{j}=[map_object.X(Keep),map_object.Y(Keep)];
+                <span class="keyword">end</span>
+                <span class="comment">%Worry about 0 indices later</span>
+
+            <span class="keyword">end</span>
+            Ah=cell(size(Keep,1),1);
+            <span class="keyword">if</span> ~exist(<span class="string">'LineWidth'</span>,<span class="string">'var'</span>)
+                LineWidth=0.5*ones(size(Keep,1),1);
+            <span class="keyword">end</span>
+
+            <span class="comment">%Figure Out Color</span>
+            seleColor=cell(size(Coord{1},1),1);
+            h1=figure();
+            ColorMap=colormap(ColorMapType);
+            <span class="keyword">switch</span> lower(ColorMode)
+
+                <span class="keyword">case</span> <span class="string">'monochrome'</span>
+                    <span class="keyword">if</span> exist(<span class="string">'ColorValue'</span>,<span class="string">'var'</span>)
+                        seleColor=repmat({ColorValue},size(Coord{1},1),1);
+                    <span class="keyword">elseif</span> exist(<span class="string">'ColorMapIndex'</span>,<span class="string">'var'</span>)
+                        <span class="keyword">if</span> isnan(ColorMapIndex)
+                            seleColor=repmat({[0,0,0]},size(Coord{1},1),1);
+                        <span class="keyword">else</span>
+                            seleColor=repmat({ColorMap(ColorMapIndex,:)},size(Coord{1},1),1);
+                        <span class="keyword">end</span>
+                    <span class="keyword">else</span>
+                        seleColor=repmat({[0,0,0]},size(Coord{1},1),1);
+                    <span class="keyword">end</span>
+                <span class="keyword">case</span> <span class="string">'gradient'</span>
+                    <span class="keyword">if</span> ~exist(<span class="string">'GradientMap'</span>,<span class="string">'var'</span>)
+
+                        seleColor=mat2cell(ColorMap(round(colon(1,63/(size(Coord{1},1)-1),64)),:),<span class="keyword">...</span>
+                            ones(size(Coord{1},1),1));
+                    <span class="keyword">else</span>
+                        <span class="keyword">if</span> size(GradientMap,2) &gt; size(Coord{1},1)
+                            GradientMap=GradientMap(1,inMap);
+                        <span class="keyword">end</span>
+                        seleColor=mat2cell(ColorMap(GradientMap,:),<span class="keyword">...</span>
+                            ones(size(Coord{1},1),1));
+
+                    <span class="keyword">end</span>
+
+            <span class="keyword">end</span>
+
+
+            d=[Coord{:}];
+            <span class="keyword">if</span> size(d,2)==2
+                [~,~,J]=unique(d,<span class="string">'rows'</span>);
+                LineRows=d(sort(J),:);
+            <span class="keyword">elseif</span> size(d,2)==4
+                LineRows=d(sum(d==d(:,[3,4,1,2]),2)~=4,:);
+            <span class="keyword">else</span>
+                error(<span class="string">'What???'</span>)
+            <span class="keyword">end</span>
+
+            <span class="keyword">if</span> strcmp(shape,<span class="string">'contour'</span>)
+                LineRows=[map_object.X(1:end-1),map_object.Y(1:end-1),map_object.X(2:end),map_object.Y(2:end)];
+            <span class="keyword">end</span>
+
+            numSets=ceil(size(LineRows,1)/MaxItems);
+            h=zeros(numSets,1);
+
+            <span class="keyword">if</span> ~exist(<span class="string">'file_name'</span>,<span class="string">'var'</span>)
+                file_name=<span class="string">'foo.eps'</span>;
+            <span class="keyword">end</span>
+            <span class="keyword">if</span> iscell(file_name)
+                file_name=[file_name{:}];
+            <span class="keyword">end</span>
+            [epspath,epsfile,epsext]=fileparts(file_name);
+            <span class="keyword">if</span> numSets &gt; 1
+                epspath=fullfile(epspath,epsfile);
+                mkdir(epspath);
+            <span class="keyword">end</span>
+
+            <span class="keyword">for</span> setnum=1:numSets
+                <span class="keyword">if</span> setnum==1
+                    h(1)=h1;
+                <span class="keyword">else</span>
+                    h(setnum)=figure();
+                <span class="keyword">end</span>
+                set(h(setnum),<span class="string">'Units'</span>,<span class="string">'points'</span>)
+                set(h(setnum),<span class="string">'Position'</span>,[2200,-50,width_fig,height_fig])
+
+                <span class="keyword">if</span> EnableColorBar &amp;&amp; exist(<span class="string">'GradientMap'</span>,<span class="string">'var'</span>) &amp;&amp; strcmpi(ColorMode,<span class="string">'gradient'</span>) <span class="comment">%other logic</span>
+                    hc=colorbar();
+                    ColorMap2=((m(1):(m(2)-m(1))*0.2:m(2))-m(1))/(m(2)-m(1))*63+1;
+                    <span class="comment">%     num2str(round(10*(m(1):(m(2)-m(1))*0.2:m(2)))'/10);</span>
+                    set(hc,<span class="string">'YTickLabel'</span>,num2str(round(10*(m(1):(m(2)-m(1))*0.2:m(2)))'/10))
+                    set(hc,<span class="string">'YTick'</span>,ColorMap2)
+                <span class="keyword">end</span>
+
+                <span class="keyword">if</span> setnum==numSets
+                    seleset=MaxItems*(setnum-1)+1:size(LineRows,1);
+                <span class="keyword">else</span>
+                    seleset=MaxItems*(setnum-1)+1:MaxItems*setnum;
+                <span class="keyword">end</span>
+
+                <span class="keyword">for</span> i=seleset
+                    <span class="keyword">switch</span> shape
+                        <span class="keyword">case</span> {<span class="string">'ellipse'</span>,<span class="string">'rectangle'</span>}
+                            <span class="keyword">for</span> j=1:length(LineRows(i,:))/2
+                                annotation(shape,<span class="string">'Position'</span>,[(LineRows(i,2*j-1)+x_corr)/width_fig,<span class="keyword">...</span>
+                                    (LineRows(i,2*j)+y_corr)/height_fig,width_shape/width_fig,<span class="keyword">...</span>
+                                    height_shape/height_fig],<span class="string">'LineWidth'</span>,LineWidth(i),<span class="keyword">...</span>
+                                    <span class="string">'Color'</span>,seleColor{i});
+                            <span class="keyword">end</span>
+                        <span class="keyword">case</span> <span class="string">'line'</span>
+                            Ah{i}=annotation(shape,[(LineRows(i,1)+x_corr)/width_fig,<span class="keyword">...</span>
+                                (LineRows(i,3)+x_corr)/width_fig],[(LineRows(i,2)+y_corr)/height_fig,<span class="keyword">...</span>
+                                (LineRows(i,4)+y_corr)/height_fig],<span class="string">'LineWidth'</span>,LineWidth(i),<span class="keyword">...</span>
+                                <span class="string">'Color'</span>,seleColor{i});
+                        <span class="keyword">case</span> <span class="string">'contour'</span>
+                            Ah{i}=annotation(<span class="string">'line'</span>,[(LineRows(i,1)+x_corr)/width_fig,<span class="keyword">...</span>
+                                (LineRows(i,3)+x_corr)/width_fig],[(LineRows(i,2)+y_corr)/height_fig,<span class="keyword">...</span>
+                                (LineRows(i,4)+y_corr)/height_fig],<span class="string">'LineWidth'</span>,2.7);
+                        <span class="keyword">case</span> <span class="string">'text'</span>
+                            FontSizeCorrFact=1-NewFontSize/8;
+                            Ah{i}=annotation(<span class="string">'textbox'</span>,[(Coord{1}(i,1)+x_corr + FontSizeCorrFact*width_shape/2 )/width_fig,<span class="keyword">...</span>
+                                (Coord{1}(i,2)+y_corr + FontSizeCorrFact*height_shape)/height_fig,width_shape/width_fig,<span class="keyword">...</span>
+                                height_shape/height_fig],<span class="string">'String'</span>,TextLabels{i},<span class="string">'LineStyle'</span>,<span class="keyword">...</span>
+                                <span class="string">'none'</span>,<span class="string">'Margin'</span>,0,<span class="string">'HorizontalAlignment'</span>,<span class="string">'center'</span>,<span class="keyword">...</span>
+                                <span class="string">'VerticalAlignment'</span>,<span class="string">'bottom'</span>,<span class="string">'FontSize'</span>,8,<span class="keyword">...</span>
+                                <span class="string">'Color'</span>,seleColor{i});
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+                <span class="comment">%print('-deps ','-zbuffer',file_name)</span>
+
+                <span class="keyword">try</span>
+                    <span class="keyword">if</span> numSets &gt; 1
+                        hgexport(h(setnum), fullfile(epspath,[epsfile,<span class="string">'_set'</span>,num2str(setnum),epsext]));
+                    <span class="keyword">else</span>
+                        hgexport(h(setnum), fullfile(epspath,[epsfile,epsext]));
+                    <span class="keyword">end</span>
+                <span class="keyword">catch</span>
+                    <span class="keyword">if</span> numSets &gt; 1
+                        hgexport(h(setnum), fullfile(epspath,[epsfile,<span class="string">'_set'</span>,num2str(setnum),epsext]));
+                    <span class="keyword">else</span>
+                        hgexport(h(setnum), fullfile(epspath,[epsfile,epsext]));
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+
+        <span class="keyword">end</span>
+
+        [ Map ] = PDBentry2Map2D(PDBEntry, PDBEntry_Target,map_object,varargin)
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><p class="footer"><br>
+      Published with MATLAB&reg; 7.14<br></p></div><!--
+##### SOURCE BEGIN #####
+classdef Map2D < handle
+    %UNTITLED3 Summary of this class goes here
+    %   Detailed explanation goes here
+    
+    properties
+        Name='un-named'
+        ItemNames
+        X
+        Y
+        Other
+        TextLabels
+        LineLabels
+    end
+    
+    methods
+        function map_object = Map2D(name,fullfilepath,varargin)
+            if nargin > 0
+                map_object.Name  = name;
+            end
+            if nargin > 1
+                map_object.AddMap(fullfilepath,varargin{:});
+                map_object.Transform(varargin{:});
+                map_object.PlotCoord(varargin{:},'filename',[map_object.Name,...
+                    '_Def.eps']);
+                map_object.CountourLine(varargin{:},'filename',[map_object.Name,...
+                    '_Def_Contour.eps']);
+            end
+        end
+        
+        function AddMap(map_object,fullfilepath,varargin)
+            height_fig=792;
+            FontSize='3.9';
+            
+            
+            if nargin > 1
+                for ind=1:length(varargin)/2
+                    switch varargin{2*ind-1}
+                        case 'height_fig'
+                            height_fig=varargin{2*ind};
+                        case 'DataPointNames'
+                            DataPointNames=varargin{2*ind};
+                        case 'FontSize'
+                            FontSize=varargin{2*ind};
+                    end
+                end
+            end
+            
+            [~,~,file_ext] = fileparts(fullfilepath);
+            switch file_ext
+                case '.csv'
+                    textfile=fileread(fullfilepath);
+                    ParsedText=regexp(textfile,'(?<ItemName>[\d\w]+),(?<Letter>\w),(?<X>[^,]+),(?<Y>[^,\s]+)','names');
+                    numTextLabels=length(ParsedText);
+                    Text_Labels_Struct=repmat(struct('ItemName','','LabelText','','X','','Y','','Font','MyriadPro-Regular','FontSize',num2str(FontSize),'FontColor',[0,0,0],'Fill','#000000'),numTextLabels,1);
+
+                    for i=1:numTextLabels
+                        Text_Labels_Struct(i).Matrix=[1,0,0,1,str2double(ParsedText(i).X),str2double(ParsedText(i).Y)];
+                        Text_Labels_Struct(i).X=Text_Labels_Struct(i).Matrix(5);
+                        Text_Labels_Struct(i).Y=Text_Labels_Struct(i).Matrix(6);
+                        Text_Labels_Struct(i).ItemName=ParsedText(i).ItemName;
+                        Text_Labels_Struct(i).LabelText=ParsedText(i).Letter;
+                    end
+                    
+                case '.xrna'
+                    textfile=fileread(fullfilepath);
+                    ParsedText=regexp(textfile,'(?<Letter>[ACGUT]) (?<X>[^\s]+) (?<Y>[^\s]+)','names');
+                    numTextLabels=length(ParsedText);
+                    Text_Labels_Struct=repmat(struct('ItemName','','LabelText','','X','','Y','','Font','MyriadPro-Regular','FontSize',num2str(FontSize),'FontColor',[0,0,0],'Fill','#000000'),numTextLabels,1);
+                    
+                    if exist('DataPointNames','var') && ischar(DataPointNames) && exist(DataPointNames,'file')
+                        textfile=fileread(DataPointNames);
+                        DataPointNames=regexp(textfile,'[\w]*','match');
+                    end
+                    
+                    if ~exist('DataPointNames','var')
+                        DataPointNames=strtrim(cellstr(num2str((1:numTextLabels)')));
+                    end
+                    
+                    for i=1:numTextLabels
+                        Text_Labels_Struct(i).Matrix=[1,0,0,1,str2double(ParsedText(i).X),str2double(ParsedText(i).Y)];
+                        Text_Labels_Struct(i).X=Text_Labels_Struct(i).Matrix(5);
+                        Text_Labels_Struct(i).Y=Text_Labels_Struct(i).Matrix(6);
+                        Text_Labels_Struct(i).ItemName=DataPointNames{i};
+                        Text_Labels_Struct(i).LabelText=ParsedText(i).Letter;
+                    end
+                
+                
+                case '.svg'
+                    SVGdata=fileread(fullfilepath);
+                    
+                    ParsedText=regexp(SVGdata,['<text( id="[^"]*")? transform="matrix\((?<transform>[\d|\s|\.]+)\)" ',...
+                        'fill="(?<fill>[^"]+)" font-family="''(?<font_family>[^'']+)''" font-size="(?<font_size>[^"]+)"',...
+                        '>(?<LabelText>[^<]+)</text>'],'tokens');
+                    numTextLabels=length(ParsedText);
+                    Text_Labels_Struct=repmat(struct('ItemName','','LabelText','','X','','Y','','Font','','FontSize','','FontColor',[0,0,0],'Fill','#000000'),numTextLabels,1);
+                    
+                    
+                    if exist('DataPointNames','var') && ischar(DataPointNames) && exist(DataPointNames,'file')
+                        textfile=fileread(DataPointNames);
+                        DataPointNames=regexp(textfile,'[\w]*','match');
+                    end
+                    
+                    if ~exist('DataPointNames','var')
+                        DataPointNames=strtrim(cellstr(num2str((1:numTextLabels)')));
+                    end
+                    
+                    for i=1:numTextLabels
+                        Text_Labels_Struct(i).Matrix=str2num(ParsedText{i}{2}); %#ok<ST2NM>
+                        Text_Labels_Struct(i).X=Text_Labels_Struct(i).Matrix(5);
+                        Text_Labels_Struct(i).Y=height_fig-Text_Labels_Struct(i).Matrix(6);
+                        Text_Labels_Struct(i).ItemName=DataPointNames{i};
+                        Text_Labels_Struct(i).LabelText=ParsedText{i}{6};
+                        Text_Labels_Struct(i).Letter=Text_Labels_Struct(i).LabelText;
+                        Text_Labels_Struct(i).Font=ParsedText{i}{4};
+                        Text_Labels_Struct(i).FontSize=str2double(ParsedText{i}{5});
+                        fill=ParsedText{i}{3}(2:end);
+                        if strcmp(fill,'none')
+                            Text_Labels_Struct(i).FontColor=[0,0,0];
+                        else
+                            Text_Labels_Struct(i).FontColor=[hex2dec(fill(1:2)),hex2dec(fill(3:4)),hex2dec(fill(5:6))]/256;
+                        end
+                        Text_Labels_Struct(i).Fill=ParsedText{i}{3};
+                    end
+            end
+            
+            map_object.AddMapStruct(Text_Labels_Struct);
+        end
+        
+        function AddMapStruct(map_object,DataStruct)
+            map_object.ItemNames={DataStruct(:).ItemName}';
+            map_object.X=[DataStruct(:).X]';
+            map_object.Y=[DataStruct(:).Y]';
+            map_object.Other=DataStruct;
+            
+        end
+        
+        function Transform(map_object,varargin)
+            molecule='23S';
+            %             alignResi='562';
+            scale_fact=0.5;
+            noTransform=false();
+            
+            if nargin > 1
+                for ind=1:length(varargin)/2
+                    switch varargin{2*ind-1}
+                        case 'molecule'
+                            molecule=varargin{2*ind};
+                            
+                        case 'alignResi'
+                            alignResi=varargin{2*ind};
+                            %                         case 'toPos'
+                            %                             toPos=varargin{2*ind};
+                        case 'scale_fact'
+                            scale_fact=varargin{2*ind};
+                        case 'noTransform'
+                            noTransform=varargin{2*ind};
+                    end
+                end
+            end
+            
+            if noTransform
+                return
+            end
+            
+            switch lower(molecule)
+                case '23s'
+                    toPos=[356.5340,408.675];
+                case '16s'
+                    toPos=[316.553,404.6670];
+                case '5s'
+                    toPos=[106.226,198.2240];
+            end
+            if ~exist('alignResi','var')
+                switch lower(molecule)
+                    case '23s'
+                        alignResi='562';
+                    case '16s'
+                        alignResi='1400';
+                    case '5s'
+                        alignResi='20';
+                end
+            end
+            map_object.X=map_object.X*scale_fact;
+            map_object.Y=map_object.Y*scale_fact;
+            
+            [~,I]=ismember(alignResi,map_object.ItemNames);
+            map_object.X=map_object.X + (toPos(1) - map_object.X(I));
+            map_object.Y=map_object.Y + (toPos(2) - map_object.Y(I));
+            
+        end
+        
+        function CountourLine(map_object,varargin)
+            map_object.PlotCoord('shape','contour','x_corr',-.442,'y_corr',1.27,varargin{:});
+        end
+        
+        function PrintCoord(map_object,IncludeItems)
+            if nargin > 1
+                [~,I]=ismember(IncludeItems,map_object.ItemNames);
+                disp([map_object.X(I),map_object.Y(I)])
+            else
+                disp([map_object.X,map_object.Y])
+            end
+        end
+        
+        function Coord=GetCoord(map_object,IncludeItems)
+            if nargin > 1
+                numPoints=size(IncludeItems,2);
+                Coord=cell(numPoints,1);
+                
+                for j=1:numPoints
+                    %                 Keep=false(length(map_object.ItemNames),1);
+                    [~,II]=ismember(IncludeItems(:,j),map_object.ItemNames);
+                    Keep=II;
+                    Keep(Keep==0)=[];
+                    if Keep==0
+                        Coord{j}=[];
+                        
+                    else
+                        Coord{j}=[map_object.X(Keep),map_object.Y(Keep)];
+                    end;
+                end
+            else
+                Coord=[map_object.X,map_object.Y];
+            end
+        end
+        
+        function [Table]=BasicTable(myMap,pdb_obj,varargin)
+            
+            %             startIndex=0;
+            numResi=length(vertcat(myMap.ItemNames));
+            numMaps=length(myMap);
+            letter=cell(numMaps,1);
+            xtal_index=cell(numMaps,1);
+            chain_letter=cell(numMaps,1);
+
+            Table=cell(numResi,7);
+            Table(:,1)=num2cell(1:numResi);
+            Table(:,2)=vertcat(myMap.ItemNames);
+            for i=1:numMaps
+                letter{i}={myMap(i).Other.Letter}';
+                d=regexp(unique(pdb_obj(i).UniqueResSeq),'(.)_[\s]*([\w]+)','tokens');
+                d=[d{:}];
+                residue_Chain_list=vertcat(d{:});
+                residue_list=residue_Chain_list(:,2);
+                chain_list=residue_Chain_list(:,1);
+                %                 xtalindex=startIndex + (1:length(residue_list));
+                xtalindex=1:length(residue_list);
+                
+                [inMap,I]=ismember(residue_list,myMap(i).ItemNames);
+                [~,II]=sort(I(I~=0));
+                r=residue_list(inMap);
+                [~,III]=ismember(r(II),myMap(i).ItemNames);
+                
+                %                 xtal_index{i}=num2cell(zeros(length(myMap(i).ItemNames),1));
+                xtal_index{i}=cell(length(myMap(i).ItemNames),1);
+                chain_letter{i}=cell(length(myMap(i).ItemNames),1);
+                xtal_index{i}(III)=num2cell(xtalindex(II));
+                chain_letter{i}(III)=chain_list(II);
+                %                 startIndex=startIndex + length(residue_list);
+            end
+            Table(:,3)=vertcat(letter{:});
+            Table(:,4)=vertcat(chain_letter{:});
+            Table(:,5)=num2cell(vertcat(myMap.X));
+            Table(:,6)=num2cell(vertcat(myMap.Y));
+            Table(:,7)=vertcat(xtal_index{:});
+            
+            
+            
+            
+        end
+        
+        function [All_Table,TextTable,LineTable]=TableLabels(map_object,varargin)
+            
+            numTextLabels=length(map_object.TextLabels);
+            TextTable=cell(numTextLabels,6);
+            TextTable(:,1)={map_object.TextLabels(:).LabelText};
+            TextTable(:,2)={map_object.TextLabels(:).X};
+            TextTable(:,3)={map_object.TextLabels(:).Y};
+            TextTable(:,4)={map_object.TextLabels(:).Font};
+            TextTable(:,5)={map_object.TextLabels(:).FontSize};
+            TextTable(:,6)={map_object.TextLabels(:).Fill};
+            
+            numLineLabels=length(map_object.LineLabels);
+            LineTable=cell(numLineLabels,9);
+            LineTable(:,1)={map_object.LineLabels(:).X1};
+            LineTable(:,2)={map_object.LineLabels(:).Y1};
+            LineTable(:,3)={map_object.LineLabels(:).X2};
+            LineTable(:,4)={map_object.LineLabels(:).Y2};
+            LineTable(:,5)={map_object.LineLabels(:).Fill};
+            LineTable(:,6)={map_object.LineLabels(:).Stroke};
+            LineTable(:,7)={map_object.LineLabels(:).Stroke_Width};
+            LineTable(:,8)={map_object.LineLabels(:).Stroke_Linejoin};
+            LineTable(:,9)={map_object.LineLabels(:).Stroke_Miterlimit};
+            
+            All_Table.Text=TextTable;
+            All_Table.Line=LineTable;
+            
+        end
+        
+        function PlotLabels(map_object,varargin)
+            width_fig=612;
+            height_fig=792;
+            Orientation='portrait';
+            
+            width_shape=10;
+            height_shape=10;
+            
+            
+            
+            
+            if nargin > 1
+                for ind=1:length(varargin)/2
+                    switch varargin{2*ind-1}
+                        case 'Orientation'
+                            Orientation=varargin{2*ind};
+                    end
+                end
+            end
+            
+            
+            
+            
+            
+            if strcmpi(Orientation,'landscape')
+                if width_fig < height_fig
+                    old_width_fig=width_fig;
+                    width_fig=height_fig;
+                    height_fig=old_width_fig;
+                end
+            end
+            %             x_corr=0;
+            %             y_corr=0;
+            
+            numLabels=length(map_object.TextLabels);
+            h=figure();
+            set(h,'Units','points')
+            set(h,'Position',[2200,-50,width_fig,height_fig])
+            
+            for i=1:numLabels
+                Ah{i}=annotation('textbox',[(map_object.TextLabels(i).X)/width_fig,...
+                    (height_fig-map_object.TextLabels(i).Y)/height_fig,width_shape/width_fig,...
+                    height_shape/height_fig],'String',map_object.TextLabels(i).LabelText,'LineStyle',...
+                    'none','Margin',0,'HorizontalAlignment','center',...
+                    'VerticalAlignment','bottom','FontSize',map_object.TextLabels(i).FontSize,...
+                    'Color',map_object.TextLabels(i).FontColor);
+            end
+            %             map_object.PlotCoord('shape','text')
+        end
+        
+        function PlotCoord(map_object,varargin)
+            width_fig=612;
+            height_fig=792;
+            width_shape=3.333;
+            height_shape=3.333;
+            LetterHeight=4.239;
+            %             TextLabels=map_object.ItemNames;
+            IncludeItems=map_object.ItemNames;
+            NewFontSize=8;
+            shape='ellipse';
+            Orientation='portrait';
+            ColorMapType='jet';
+            ColorMode='MonoChrome';
+            EnableColorBar=true();
+            MaxItems=500;
+            %             ColorValue=[1,1,1];
+            %             ColorMapIndex=1;
+            
+            if nargin > 1
+                for ind=1:length(varargin)/2
+                    switch varargin{2*ind-1}
+                        case 'EnableColorBar'
+                            EnableColorBar=varargin{2*ind};
+                        case 'width_fig'
+                            width_fig=varargin{2*ind};
+                        case 'height_fig'
+                            height_fig=varargin{2*ind};
+                        case 'width_shape'
+                            width_shape=varargin{2*ind};
+                        case 'height_shape'
+                            height_shape=varargin{2*ind};
+                        case 'LetterHeight'
+                            LetterHeight=varargin{2*ind};
+                        case 'x_corr'
+                            x_corr=varargin{2*ind};
+                        case 'y_corr'
+                            y_corr=varargin{2*ind};
+                        case 'shape'
+                            shape=varargin{2*ind};
+                            %                         case 'TextLabels'
+                            %                             TextLabels=varargin{2*ind};
+                        case 'IncludeItems'
+                            IncludeItems=varargin{2*ind};
+                        case 'LineWidth'
+                            LineWidth=varargin{2*ind};
+                        case 'DesiredFontSize'
+                            NewFontSize=varargin{2*ind};
+                        case 'filename'
+                            file_name=varargin{2*ind};
+                        case 'Orientation'
+                            Orientation=varargin{2*ind};
+                        case 'ColorMap'
+                            ColorMapType=varargin{2*ind};
+                        case 'ColorMode'
+                            ColorMode=varargin{2*ind};
+                        case 'ColorValue'
+                            ColorValue=varargin{2*ind};
+                        case 'ColorMapIndex'
+                            ColorMapIndex=varargin{2*ind};
+                        case 'VarInterest'
+                            if iscell(varargin{2*ind})
+                                VarInterest=varargin{2*ind}{1};
+                                m=varargin{2*ind}{2};
+                            else
+                                VarInterest=varargin{2*ind};
+                                m=minmax(VarInterest);
+                            end
+                            GradientMap=round(63*(VarInterest - m(1))/(m(2)-m(1)) + 1);
+                        case 'MaxItems'
+                            MaxItems=varargin{2*ind};
+                    end
+                end
+            end
+            
+            if strcmpi(Orientation,'landscape')
+                if width_fig < height_fig
+                    old_width_fig=width_fig;
+                    width_fig=height_fig;
+                    height_fig=old_width_fig;
+                end
+            end
+            
+            switch shape
+                case {'line','contour'}
+                    width_shape=0;
+                    height_shape=0;
+            end
+            
+            
+            
+            if ~exist('x_corr','var')
+                switch Orientation
+                    case 'landscape'
+                        x_corr=-0.6620-width_shape/2; % (old map, new way)
+                    case 'portrait'
+                        x_corr=-.965-width_shape/2; % (New map)
+                end
+            end
+            
+            if ~exist('y_corr','var')
+                switch Orientation
+                    case 'landscape'
+                        y_corr= 0.9-height_shape/2;
+                    case 'portrait'
+                        y_corr=1.8-height_shape/2 ;
+                end
+            end
+            
+            numPoints=size(IncludeItems,2);
+            Coord=cell(numPoints,1);
+            
+            for j=1:numPoints
+                %                 Keep=false(length(map_object.ItemNames),1);
+                [inMap,II]=ismember(IncludeItems(:,j),map_object.ItemNames);
+                Keep=II;
+                Keep(Keep==0)=[];
+                if Keep==0
+                    Coord{j}=[];
+                    
+                else
+                    Coord{j}=[map_object.X(Keep),map_object.Y(Keep)];
+                end
+                %Worry about 0 indices later
+                
+            end
+            Ah=cell(size(Keep,1),1);
+            if ~exist('LineWidth','var')
+                LineWidth=0.5*ones(size(Keep,1),1);
+            end
+            
+            %Figure Out Color
+            seleColor=cell(size(Coord{1},1),1);
+            h1=figure();
+            ColorMap=colormap(ColorMapType);
+            switch lower(ColorMode)
+                
+                case 'monochrome'
+                    if exist('ColorValue','var')
+                        seleColor=repmat({ColorValue},size(Coord{1},1),1);
+                    elseif exist('ColorMapIndex','var')
+                        if isnan(ColorMapIndex)
+                            seleColor=repmat({[0,0,0]},size(Coord{1},1),1);
+                        else
+                            seleColor=repmat({ColorMap(ColorMapIndex,:)},size(Coord{1},1),1);
+                        end
+                    else
+                        seleColor=repmat({[0,0,0]},size(Coord{1},1),1);
+                    end
+                case 'gradient'
+                    if ~exist('GradientMap','var')
+                        
+                        seleColor=mat2cell(ColorMap(round(colon(1,63/(size(Coord{1},1)-1),64)),:),...
+                            ones(size(Coord{1},1),1));
+                    else
+                        if size(GradientMap,2) > size(Coord{1},1)
+                            GradientMap=GradientMap(1,inMap);
+                        end
+                        seleColor=mat2cell(ColorMap(GradientMap,:),...
+                            ones(size(Coord{1},1),1));
+                        
+                    end
+                    
+            end
+            
+            
+            d=[Coord{:}];
+            if size(d,2)==2
+                [~,~,J]=unique(d,'rows');
+                LineRows=d(sort(J),:);
+            elseif size(d,2)==4
+                LineRows=d(sum(d==d(:,[3,4,1,2]),2)~=4,:);
+            else
+                error('What???')
+            end
+            
+            if strcmp(shape,'contour')
+                LineRows=[map_object.X(1:end-1),map_object.Y(1:end-1),map_object.X(2:end),map_object.Y(2:end)];
+            end
+            
+            numSets=ceil(size(LineRows,1)/MaxItems);
+            h=zeros(numSets,1);
+            
+            if ~exist('file_name','var')
+                file_name='foo.eps';
+            end
+            if iscell(file_name)
+                file_name=[file_name{:}];
+            end
+            [epspath,epsfile,epsext]=fileparts(file_name);
+            if numSets > 1
+                epspath=fullfile(epspath,epsfile);
+                mkdir(epspath);
+            end
+            
+            for setnum=1:numSets
+                if setnum==1
+                    h(1)=h1;
+                else
+                    h(setnum)=figure();
+                end
+                set(h(setnum),'Units','points')
+                set(h(setnum),'Position',[2200,-50,width_fig,height_fig])
+                
+                if EnableColorBar && exist('GradientMap','var') && strcmpi(ColorMode,'gradient') %other logic
+                    hc=colorbar();
+                    ColorMap2=((m(1):(m(2)-m(1))*0.2:m(2))-m(1))/(m(2)-m(1))*63+1;
+                    %     num2str(round(10*(m(1):(m(2)-m(1))*0.2:m(2)))'/10);
+                    set(hc,'YTickLabel',num2str(round(10*(m(1):(m(2)-m(1))*0.2:m(2)))'/10))
+                    set(hc,'YTick',ColorMap2)
+                end
+                
+                if setnum==numSets
+                    seleset=MaxItems*(setnum-1)+1:size(LineRows,1);
+                else
+                    seleset=MaxItems*(setnum-1)+1:MaxItems*setnum;
+                end
+                
+                for i=seleset
+                    switch shape
+                        case {'ellipse','rectangle'}
+                            for j=1:length(LineRows(i,:))/2
+                                annotation(shape,'Position',[(LineRows(i,2*j-1)+x_corr)/width_fig,...
+                                    (LineRows(i,2*j)+y_corr)/height_fig,width_shape/width_fig,...
+                                    height_shape/height_fig],'LineWidth',LineWidth(i),...
+                                    'Color',seleColor{i});
+                            end
+                        case 'line'
+                            Ah{i}=annotation(shape,[(LineRows(i,1)+x_corr)/width_fig,...
+                                (LineRows(i,3)+x_corr)/width_fig],[(LineRows(i,2)+y_corr)/height_fig,...
+                                (LineRows(i,4)+y_corr)/height_fig],'LineWidth',LineWidth(i),...
+                                'Color',seleColor{i});
+                        case 'contour'
+                            Ah{i}=annotation('line',[(LineRows(i,1)+x_corr)/width_fig,...
+                                (LineRows(i,3)+x_corr)/width_fig],[(LineRows(i,2)+y_corr)/height_fig,...
+                                (LineRows(i,4)+y_corr)/height_fig],'LineWidth',2.7);
+                        case 'text'
+                            FontSizeCorrFact=1-NewFontSize/8;
+                            Ah{i}=annotation('textbox',[(Coord{1}(i,1)+x_corr + FontSizeCorrFact*width_shape/2 )/width_fig,...
+                                (Coord{1}(i,2)+y_corr + FontSizeCorrFact*height_shape)/height_fig,width_shape/width_fig,...
+                                height_shape/height_fig],'String',TextLabels{i},'LineStyle',...
+                                'none','Margin',0,'HorizontalAlignment','center',...
+                                'VerticalAlignment','bottom','FontSize',8,...
+                                'Color',seleColor{i});
+                    end
+                end
+                %print('-deps ','-zbuffer',file_name)
+                
+                try
+                    if numSets > 1
+                        hgexport(h(setnum), fullfile(epspath,[epsfile,'_set',num2str(setnum),epsext]));
+                    else
+                        hgexport(h(setnum), fullfile(epspath,[epsfile,epsext]));
+                    end
+                catch
+                    if numSets > 1
+                        hgexport(h(setnum), fullfile(epspath,[epsfile,'_set',num2str(setnum),epsext]));
+                    else
+                        hgexport(h(setnum), fullfile(epspath,[epsfile,epsext]));
+                    end
+                end
+            end
+            
+        end
+        
+        [ Map ] = PDBentry2Map2D(PDBEntry, PDBEntry_Target,map_object,varargin)
+    end
+    
+end
+
+
+##### SOURCE END #####
+--></body></html>

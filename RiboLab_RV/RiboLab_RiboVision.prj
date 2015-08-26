@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deployment-project plugin="plugin.apptool" plugin-version="1.0">
+  <configuration target="target.mlapps" target-name="Package App" name="RiboLab_RiboVision" location="C:\Users\Chad\Research\Software\MATLAB\RiboLab_RV" file="C:\Users\Chad\Research\Software\MATLAB\RiboLab_RV\RiboLab_RiboVision.prj" build-checksum="3846978237">
+    <param.appname>RiboLab_RiboVision</param.appname>
+    <param.authnamewatermark>Chad R. Bernier</param.authnamewatermark>
+    <param.email>Bernier.C.R@gatech.edu</param.email>
+    <param.company>Georgia Institute of Technology</param.company>
+    <param.icon />
+    <param.summary>This program will aid in the create of new RiboVision Data Sets.</param.summary>
+    <param.description>This is cool. Features working, needs new features. Huge speed improvement. This version now has editable molecule type, in case automatic detection is wrong. More example/data files. Bug fixes.</param.description>
+    <param.screenshot>${PROJECT_ROOT}\RiboLaB_RV_Screen.png</param.screenshot>
+    <param.version>0.18</param.version>
+    <param.products.name>
+      <item>Curve Fitting Toolbox</item>
+      <item>Bioinformatics Toolbox</item>
+      <item>Neural Network Toolbox</item>
+      <item>Statistics Toolbox</item>
+      <item>MATLAB</item>
+    </param.products.name>
+    <param.products.id>
+      <item>60</item>
+      <item>83</item>
+      <item>12</item>
+      <item>19</item>
+      <item>1</item>
+    </param.products.id>
+    <param.products.version>
+      <item>3.3</item>
+      <item>4.2</item>
+      <item>8.0</item>
+      <item>8.1</item>
+      <item>8.0</item>
+    </param.products.version>
+    <param.platforms />
+    <param.output>${PROJECT_ROOT}\RiboLab_RiboVision.mlappinstall</param.output>
+    <param.guid>f904a773-5b2b-46fe-8f2a-de497e96284f</param.guid>
+    <unset>
+      <param.icon />
+      <param.platforms />
+    </unset>
+    <fileset.main>
+      <file>${PROJECT_ROOT}\RiboLabRV.m</file>
+    </fileset.main>
+    <fileset.depfun>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ARSMI\@Chain\Chain.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ARSMI\@Chain\plus.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ARSMI\@FullAtomModel\FullAtomModel.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ARSMI\@PseudoAtoms\plus.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ARSMI\@PseudoAtoms\PseudoAtoms.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ARSMI\@Residues\plus.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ARSMI\@Residues\Residues.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\AlignmentFilter.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\Analyze.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\BarBinPlot.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\CADS.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\cSequenceColor.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\EntropyFiltering.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\FilterMap.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\FilterVarPlot.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\Map3Dto2D.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\OnionPlot.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\Plot2DMap.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\PlotAlignment.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\PlotOnion.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\PlotRamachandran.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\PlotVar.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\private\BreakSubset.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\private\ChargeCounts.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\private\cSequenceColor.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\private\Entropy.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\private\FilterVar.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\PropDistro.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\RamachandranPlot.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\RMSE.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\SubsetAnalysis.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\VarPDBWrite.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\VarPlot.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@CADS\WriteMapToPyMOL.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@ConAnalOutput\ConAnalOutput.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@Protein\merge.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@Protein\OnionPlot.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@Protein\OnionPlot_count.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@Protein\OnionPlot_FractionbyConservation.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@Protein\OnionPlot_FractionbyShell.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@Protein\OnionPlot_orig.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\@Protein\Protein.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\ConAnal\Seq_entropy.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\General\ColorVar.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\General\DomainDefinitions.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\General\HelixDefinitions.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\General\ImportPDBs.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\General\PDBentry.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\General\PleaseWait.fig</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\General\PleaseWait.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\General\SelectByEdge.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\Map2D\@Map2D\Map2D.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\Map2D\@Map2D\plus.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\MapContacts\@nearestneighbour\nearestneighbour.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\MapContacts\MapContacts.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\New\BP2Table.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\New\BPorganize.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\New\CadsSet.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\New\ContactMap2BP.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\New\DomainsTable.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\New\ExtractBackboneTorsions.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\New\ExtractBasePairs.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\New\Fr3D2BP.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\New\HelicesTable.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\New\pdbwrite.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\New\PlotBP.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\New\PlotBPbyType.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\New\ProteinContactTable.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\New\ReadDomainDefTemplate.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\New\ReadHelixDefTemplate.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\New\ThermalFactorTable.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\New\UpdateBfactor.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\Onion Analysis\Onion.m</file>
+      <file>C:\Users\Chad\Research\Software\MATLAB\Others\color_line.m</file>
+      <file>${PROJECT_ROOT}\Data_Files\DomainColorGroups.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\DomainsDef\EC_LSU_DomainTemplate6.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\DomainsDef\EC_LSU_DomainTemplate7.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\DomainsDef\EC_SSU_DomainTemplate.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\DomainsDef\HM_LSU_DomainTemplate6.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\DomainsDef\HM_LSU_DomainTemplate7.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\DomainsDef\SC_LSU_DomainTemplate6.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\DomainsDef\SC_LSU_DomainTemplate7.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\DomainsDef\SC_SSU_DomainTemplate.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\DomainsDef\TT_LSU_3D_DomainTemplate7.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\DomainsDef\TT_LSU_Phylo_DomainTemplate6.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\DomainsDef\TT_SSU_DomainTemplate.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\EntropyFiles\EC_LSU_Shannon.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\EntropyFiles\EC_SSU_Shannon.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\EntropyFiles\SC_SSU_Shannon.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\EntropyFiles\TT_SSU_Shannon.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\HelicesDef\EC_LSU_HelixTemplate.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\HelicesDef\EC_SSU_HelixTemplate.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\HelicesDef\HM_LSU_HelixTemplate.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\HelicesDef\SC_LSU_HelixTemplate.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\HelicesDef\SC_SSU_HelixTemplate.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\HelicesDef\TT_LSU_3D_HelixTemplate.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\HelicesDef\TT_LSU_Phylo_HelixTemplate.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\HelicesDef\TT_SSU_HelixTemplate.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\HelixColorGroups_LSU.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\HelixColorGroups_SSU.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\StructureFiles\EC_LSU_3D_StructureFile.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\StructureFiles\EC_LSU_Phylo_StructureFile.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\StructureFiles\EC_SSU_3D_StructureFile.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\StructureFiles\EC_SSU_Phylo_StructureFile.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\StructureFiles\HM_LSU_3D_StructureFile.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\StructureFiles\HM_LSU_Phylo_StructureFile.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\StructureFiles\SC_LSU_Phylo_StructureFile.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\StructureFiles\SC_LSU_Struct_StructureFile.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\StructureFiles\SC_SSU_3D_StructureFile.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\StructureFiles\SC_SSU_Phylo_StructureFile.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\StructureFiles\TT_LSU_3D_StructureFile.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\StructureFiles\TT_LSU_Phylo_StructureFile.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\StructureFiles\TT_SSU_3D_StructureFile.csv</file>
+      <file>${PROJECT_ROOT}\Data_Files\StructureFiles\TT_SSU_Phylo_StructureFile.csv</file>
+      <file>${PROJECT_ROOT}\Example_Files\3OFO\3ofo.pdb</file>
+      <file>${PROJECT_ROOT}\Example_Files\3OFR\3ofr.mat</file>
+      <file>${PROJECT_ROOT}\Example_Files\3OFR\3ofr.pdb</file>
+      <file>${PROJECT_ROOT}\Example_Files\3OFR\FR3D_3OFR_all.txt</file>
+      <file>${PROJECT_ROOT}\Example_Files\EC\EC_30S.mat</file>
+      <file>${PROJECT_ROOT}\Example_Files\EC\EC_30S.pdb</file>
+      <file>${PROJECT_ROOT}\Example_Files\EC\EC_50S.mat</file>
+      <file>${PROJECT_ROOT}\Example_Files\EC\EC_50S.pdb</file>
+      <file>${PROJECT_ROOT}\Example_Files\EC\FR3D_4GD1_all.txt</file>
+      <file>${PROJECT_ROOT}\Example_Files\HM\1JJ2_23s_supMethod2_vis1_fixed_H.mat</file>
+      <file>${PROJECT_ROOT}\Example_Files\HM\1JJ2_23s_supMethod2_vis1_fixed_H.pdb</file>
+      <file>${PROJECT_ROOT}\Example_Files\SC2\FR3D_3U5B_all.txt</file>
+      <file>${PROJECT_ROOT}\Example_Files\SC2\SC_40S_rProtein_supL2.mat</file>
+      <file>${PROJECT_ROOT}\Example_Files\SC2\SC_40S_rProtein_supL2.pdb</file>
+      <file>${PROJECT_ROOT}\Example_Files\SC2\SC_40S_rRNA_supL2.mat</file>
+      <file>${PROJECT_ROOT}\Example_Files\SC2\SC_40S_rRNA_supL2.pdb</file>
+      <file>${PROJECT_ROOT}\Example_Files\SC2\SC_60S_rProtein_supL2.mat</file>
+      <file>${PROJECT_ROOT}\Example_Files\SC2\SC_60S_rProtein_supL2.pdb</file>
+      <file>${PROJECT_ROOT}\Example_Files\SC2\SC_60S_rRNA_supL2.mat</file>
+      <file>${PROJECT_ROOT}\Example_Files\SC2\SC_60S_rRNA_supL2.pdb</file>
+      <file>${PROJECT_ROOT}\Example_Files\TT\2J00_16s_supMethod2_vis1_fixed.mat</file>
+      <file>${PROJECT_ROOT}\Example_Files\TT\2J00_16s_supMethod2_vis1_fixed.pdb</file>
+      <file>${PROJECT_ROOT}\Example_Files\TT\2J01_23s_supMethod2_vis1_fixed.mat</file>
+      <file>${PROJECT_ROOT}\Example_Files\TT\2J01_23s_supMethod2_vis1_fixed.pdb</file>
+      <file>${PROJECT_ROOT}\Example_Files\TT\FR3D_2J00_all.txt</file>
+    </fileset.depfun>
+    <fileset.resources>
+      <file>${PROJECT_ROOT}\Data_Files</file>
+      <file>${PROJECT_ROOT}\Example_Files</file>
+      <file>${PROJECT_ROOT}\RiboLabRV.fig</file>
+    </fileset.resources>
+    <fileset.package />
+    <build-deliverables>
+      <file name="RiboLab_RiboVision.mlappinstall" location="C:\Users\Chad\Research\Software\MATLAB\RiboLab_RV" optional="false">C:\Users\Chad\Research\Software\MATLAB\RiboLab_RV\RiboLab_RiboVision.mlappinstall</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>C:\Program Files\MATLAB\R2012b</root>
+    </matlab>
+    <platform>
+      <unix>false</unix>
+      <mac>false</mac>
+      <windows>true</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>false</linux>
+      <solaris>false</solaris>
+      <osver>6.1</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>win64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>
+

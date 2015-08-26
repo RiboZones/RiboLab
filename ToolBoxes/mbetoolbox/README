@@ -1,0 +1,51 @@
+==================================================================
+Molecular Biology & Evolution Toolbox
+(C) 2007 James J. Cai
+==================================================================
+
+1. Introduction
+================
+MBEToolbox is a MATLAB toolbox for the sequence data analyses of molecular
+biology and evolution. It aims at filling this gap by offering efficient 
+implementations of the most needed functions in molecular evolution. It can be 
+used to manipulate aligned sequences, calculate evolutionary distances, 
+estimate synonymous and non-synonymous substitution rates, and infer 
+phylogenetic trees. Moreover, it is functional framework extensible for more 
+specialized needs in exploring and analyzing aligned nucleotide or protein 
+sequences from the evolutionary perspective. The full functions in the toolbox 
+are accessible through command-line for those seasoned MATLAB users, yet, it 
+does provide a graphical user interface may be especially useful for 
+non-specialist end users.
+
+2. Availability
+================
+MBEToolbox is available at http://bioinformatics.org/mbetoolbox
+This software can be used freely for academic, non-profit purposes.
+
+3. Installation (for Windows)
+================
+1) Requirements: i) MATLAB, version 6.0 and higher; ii) Windows system
+2) Download the MBEToolbox_v#.#.zip file.
+3) Create a directory called 'mbetoolbox', then unzip the file and copy
+   all files there.
+4) Adds directory of mbetoolbox to the MATLAB path.
+
+4. How to start?
+==================
+1) Start up MATLAB. 
+2) Run "MBEDEMO" for demos.
+3) Type "MBEGUI". If all goes well, this will bring up a menu-driven user 
+   interface of the toolbox. 
+
+5. How to cite?
+==================
+Cai JJ, Smith DK, Xia X, Yuen KY.
+MBEToolbox: a MATLAB toolbox for sequence data analysis in molecular biology and evolution.
+BMC Bioinformatics. 2005 Mar 22;6(1):64.
+ 
+Cai JJ, Smith DK, Xia X, Yuen KY.
+MBEToolbox 2.0: An enhanced version of a MATLAB toolbox for Molecular Biology and Evolution.
+Evolutionary Bioinformatics Online 2006:2 189-192
+
+If you have any comments or suggestions then, please, send me an email at
+jamescai@stanford.edu

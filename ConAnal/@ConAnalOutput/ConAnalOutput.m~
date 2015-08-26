@@ -1,0 +1,80 @@
+classdef ConAnalOutput < handle
+    %UNTITLED2 Summary of this class goes here
+    %   Detailed explanation goes here
+    
+    properties
+        Name
+        Protein
+        Alignment
+        Variability
+        Ramachandran
+        Map
+        species3D
+        pdb
+        chainID
+    end
+    
+    methods
+        function CAOut=ConAnalOutput(Protein,Alignment,Variability)
+            CAOut.Protein=Protein;
+            CAOut.Name=Protein.Name;
+            CAOut.Alignment=Alignment;
+            CAOut.Variability=Variability;
+        end
+        
+        function CreateRamachandran(CAOut,pdb,chain,plot)
+            if nargin < 4
+                plot='Separate';
+            end
+            CAOut.Ramachandran=ramachandran(pdb,'chain',chain,'glycine',...
+                'true','regions','true','plot',plot);
+        end
+        
+        %         function CreateContactMap(CAOut,CutOff,subset)
+        % %             CAOut.Map= MapContacts('L2_TT','r23S','A',CutOff,subset);
+        %         end
+        
+        function AddPDB(CAOut,chainID)
+        end
+        function AddContactMap(CAOut,map)
+            CAOut.Map=map;
+        end
+        
+        function AddSpecies3D(CAOut,species3D)
+            CAOut.species3D=species3D;
+        end
+        
+        function PlotVariability(CAOut,variability_bins)
+            if nargin < 2
+                variability_bins='standard';
+            end
+            figure()
+            CAOut.Protein.PlotVariability(variability_bins);
+        end
+        
+        function ShowAlignment(CAOut)
+            showalignment(CAOut.Alignment)
+        end
+        
+        function ShowCladogram(CAOut)
+            distances = seqpdist(CAOut.Alignment,'Method','Jukes-Cantor');
+            tree = seqlinkage(distances,'UPGMA',CAOut.Alignment);
+            h = plot(tree,'orient','top');
+        end
+        
+        function ShowLogo(CAOut)
+            seqlogo(CAOut.Alignment,'Alphabet','AA');
+        end
+        
+        function PlotRamachandran(CAOut)
+            obj=get(handles.output,'UserData');
+            if ~isfield(obj.pdb,'Header')
+                obj.pdb.Header.idCode=obj.Output.Name;
+            end
+            obj.Output.CreateRamachandran(obj.pdb,get(handles.ChainIDedit,'String'),'Separate')
+        end
+    end
+    
+    
+end
+

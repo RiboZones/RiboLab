@@ -1,0 +1,408 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>DOCUMENT TITLE</title>
+      <meta name="generator" content="MATLAB 7.7">
+      <meta name="date" content="2010-02-25">
+      <meta name="m-file" content="Results"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1>DOCUMENT TITLE</h1>
+         <!--introduction-->
+         <p>INTRODUCTORY TEXT</p>
+         <!--/introduction-->
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#3">SECTION TITLE</a></li>
+            </ul>
+         </div><pre class="codeinput"><span class="keyword">classdef</span> Results &lt; handle
+</pre><pre class="codeinput">    <span class="comment">%UNTITLED Summary of this class goes here</span>
+    <span class="comment">%   Detailed explanation goes here</span>
+
+    properties
+        Name
+        Pattern
+        Match
+
+        Original_Index
+        Original_FoundResidues
+
+        Pattern_Index
+        Match_Index
+
+    <span class="keyword">end</span>
+</pre><h2>SECTION TITLE<a name="3"></a></h2>
+         <p>DESCRIPTIVE TEXT</p><pre class="codeinput">    methods
+        <span class="keyword">function</span> results = Results(name)
+            results.Name=name;
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> FindNearby(results,PA,pattern,residue_list,cutoff)
+            <span class="keyword">if</span> nargin &lt; 5
+                cutoff=6;
+            <span class="keyword">end</span>
+            Index = findresidues(PA.NamesOfPseudoAtoms, pattern{1});
+
+            num_res=length(Index);
+            FoundRes=cell(1,num_res);
+            results.Match=cell(1,num_res);
+            results.Pattern=cell(1,num_res);
+            not_empty=zeros(1,num_res);
+
+            <span class="comment">%here it is assumed only one residue is in Pattern{2}. Future</span>
+            <span class="comment">%support may require adjustments to this.</span>
+            <span class="keyword">for</span> i=1:num_res
+                FoundRes{i}=find((PA.Distances(Index(i),:) &lt; cutoff)&amp; <span class="keyword">...</span>
+                    strcmp(pattern{2},PA.NamesOfPseudoAtoms));
+                <span class="keyword">if</span> cutoff~=0
+                    FoundRes{i}(FoundRes{i}==Index(i))=[];
+                <span class="keyword">end</span>
+                results.Match{i}=residue_list(FoundRes{i});
+                results.Pattern{i}=residue_list(Index(i));
+                not_empty(i)=~isempty(results.Match{i});
+            <span class="keyword">end</span>
+            results.Pattern=results.Pattern(logical(not_empty));
+            results.Match=results.Match(logical(not_empty));
+            results.Match_Index=FoundRes(logical(not_empty));
+            results.Pattern_Index=Index(logical(not_empty));
+            results.Original_FoundResidues=FoundRes;
+            results.Original_Index=Index;
+            <span class="keyword">if</span> isempty(results.Match)
+                warning(<span class="string">'No matches were found. Results will be blank.'</span>)
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> Triangle(results,pa,cutoff)
+</pre><pre class="codeinput">            <span class="comment">%still need to add support for the case of using a triangle</span>
+            <span class="comment">%method, but with a larger search string. I don't know why</span>
+            <span class="comment">%anyone would want to do that, but still it should be done.</span>
+            <span class="keyword">if</span> nargin &lt; 3
+                cutoff=6;
+            <span class="keyword">end</span>
+</pre><pre>remove false positives. these can not posibly form a triangle</pre><pre class="codeinput">            numMatches=length(results.Match);
+            <span class="keyword">for</span> i=1:numMatches
+                false_postive=results.Match_Index{i}==<span class="keyword">...</span>
+                    (results.Pattern_Index(i)+1) | <span class="keyword">...</span>
+                    results.Match_Index{i}==(results.Pattern_Index(i)-1);
+                results.Match_Index{i}(false_postive)=[];
+                results.Match{i}(false_postive)=[];
+                <span class="keyword">if</span> isempty(results.Match_Index{i})
+                    results.Match_Index(i)=[];
+                    results.Pattern_Index(i)=[];
+                    results.Match(i)=[];
+                    results.Pattern(i)=[];
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+            <span class="keyword">if</span> isempty(results.Match_Index)
+                warning(<span class="string">'No matches were found. Results will be blank.'</span>)
+                <span class="keyword">return</span>
+            <span class="keyword">end</span>
+            delete=zeros(1,length(results.Pattern_Index));
+            <span class="keyword">for</span> j=1:length(results.Pattern_Index)
+                <span class="keyword">if</span> pa.Distances(results.Pattern_Index, <span class="keyword">...</span>
+                        results.Pattern_Index+1)&gt; cutoff
+                    delete(j)=1;
+                <span class="keyword">end</span>
+                <span class="keyword">if</span> pa.Distances(results.Match_Index{j},<span class="keyword">...</span>
+                        results.Pattern_Index(j)+1) &gt; cutoff
+                    delete(j)=1;
+                <span class="keyword">end</span>
+                <span class="comment">%Do something about double finds. For now, they ar</span>
+                <span class="comment">%interesting to look at. After they are better</span>
+                <span class="comment">%characterized, something can be done about it.</span>
+
+                results.Pattern{j}=[results.Pattern{j} <span class="keyword">...</span>
+                    results.Pattern{j}+1];
+            <span class="keyword">end</span>
+            delete=logical(delete);
+            results.Match(delete)=[];
+            results.Pattern(delete)=[];
+            results.Match_Index(delete)=[];
+            results.Pattern_Index(delete)=[];
+</pre><pre class="codeinput">        <span class="keyword">end</span>
+        <span class="keyword">function</span> WriteToFile(results,ID,append)
+            num_objects=length(results.Pattern);
+            indices=cell(1,num_objects);
+            command=cell(1,num_objects);
+            filename=[ID <span class="string">'.pml'</span>];
+            <span class="keyword">if</span> ~append
+                fid=fopen(filename,<span class="string">'wt'</span>);
+                fprintf(fid, [<span class="string">'load '</span> ID <span class="string">'.pdb'</span>]);
+                fwrite(fid, sprintf(<span class="string">'\n'</span>));                                <span class="comment">% terminate this line</span>
+                fclose(fid);
+            <span class="keyword">end</span>
+            <span class="keyword">for</span> i=1:num_objects
+                fid=fopen(filename,<span class="string">'at'</span>);
+                indices{i}=[results.Pattern{i} results.Match{i}];
+                command{i}=[<span class="string">'create '</span> results.Name(end) <span class="string">'_'</span> <span class="keyword">...</span>
+                    num2str(results.Pattern{i}(1)) <span class="string">', '</span> <span class="string">'chain '</span> <span class="keyword">...</span>
+                    results.Name(end) <span class="string">' and resi '</span>];
+                fprintf(fid, command{i});
+                fclose(fid);
+                dlmwrite(filename,indices{i}, <span class="string">'delimiter'</span>, <span class="string">'+'</span>,<span class="keyword">...</span>
+                    <span class="string">'-append'</span>,<span class="string">'newline'</span>,<span class="string">'pc'</span>)
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+</pre><pre class="codeoutput">Input argument "name" is undefined.
+
+Error in ==&gt; Results.Results&gt;Results.Results at 26
+            results.Name=name;
+</pre><pre class="codeinput"><span class="keyword">end</span>
+
+<span class="keyword">function</span> [ Index ] = findresidues(NameArray, Pattern )
+<span class="comment">%</span>
+numrescheck=length(Pattern);
+tf=cell(1,numrescheck);
+
+<span class="keyword">for</span> i=1:numrescheck
+    tf{i}=strcmp(Pattern{i},NameArray);
+<span class="keyword">end</span>
+
+<span class="keyword">if</span> numrescheck==1
+    Index=find(tf{1});
+    <span class="keyword">return</span>
+<span class="keyword">end</span>
+
+TF=(tf{1} &amp; logical([tf{2}(2:end) 0]));
+
+<span class="keyword">if</span> numrescheck &gt; 2
+    <span class="keyword">for</span> j=3:numrescheck
+        TF=TF &amp; logical([tf{i}(j:end) zeros(1,j-1)]);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+Index=find(TF);
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">WDEavRCxrA000040000</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.7<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% DOCUMENT TITLE
+% INTRODUCTORY TEXT
+%%
+classdef Results < handle
+    %UNTITLED Summary of this class goes here
+    %   Detailed explanation goes here
+    
+    properties
+        Name
+        Pattern
+        Match
+        
+        Original_Index
+        Original_FoundResidues
+        
+        Pattern_Index
+        Match_Index
+        
+    end
+    
+    %% SECTION TITLE
+    % DESCRIPTIVE TEXT
+    
+    methods
+        function results = Results(name)
+            results.Name=name;
+        end
+        function FindNearby(results,PA,pattern,residue_list,cutoff)
+            if nargin < 5
+                cutoff=6;
+            end
+            Index = findresidues(PA.NamesOfPseudoAtoms, pattern{1});
+            
+            num_res=length(Index);
+            FoundRes=cell(1,num_res);
+            results.Match=cell(1,num_res);
+            results.Pattern=cell(1,num_res);
+            not_empty=zeros(1,num_res);
+            
+            %here it is assumed only one residue is in Pattern{2}. Future
+            %support may require adjustments to this.
+            for i=1:num_res
+                FoundRes{i}=find((PA.Distances(Index(i),:) < cutoff)& ...
+                    strcmp(pattern{2},PA.NamesOfPseudoAtoms));
+                if cutoff~=0
+                    FoundRes{i}(FoundRes{i}==Index(i))=[];
+                end                
+                results.Match{i}=residue_list(FoundRes{i});
+                results.Pattern{i}=residue_list(Index(i));
+                not_empty(i)=~isempty(results.Match{i});
+            end
+            results.Pattern=results.Pattern(logical(not_empty));
+            results.Match=results.Match(logical(not_empty));
+            results.Match_Index=FoundRes(logical(not_empty));
+            results.Pattern_Index=Index(logical(not_empty));
+            results.Original_FoundResidues=FoundRes;
+            results.Original_Index=Index;
+            if isempty(results.Match)
+                warning('No matches were found. Results will be blank.')
+            end
+        end
+        function Triangle(results,pa,cutoff)
+            %still need to add support for the case of using a triangle
+            %method, but with a larger search string. I don't know why
+            %anyone would want to do that, but still it should be done.
+            if nargin < 3
+                cutoff=6;
+            end
+            %%
+            %  remove false positives. these can not posibly form a triangle
+            numMatches=length(results.Match);
+            for i=1:numMatches
+                false_postive=results.Match_Index{i}==...
+                    (results.Pattern_Index(i)+1) | ...
+                    results.Match_Index{i}==(results.Pattern_Index(i)-1);                
+                results.Match_Index{i}(false_postive)=[];
+                results.Match{i}(false_postive)=[];
+                if isempty(results.Match_Index{i})
+                    results.Match_Index(i)=[];
+                    results.Pattern_Index(i)=[];
+                    results.Match(i)=[];
+                    results.Pattern(i)=[];
+                end
+            end
+            if isempty(results.Match_Index)
+                warning('No matches were found. Results will be blank.')
+                return
+            end
+            delete=zeros(1,length(results.Pattern_Index));
+            for j=1:length(results.Pattern_Index)
+                if pa.Distances(results.Pattern_Index, ...
+                        results.Pattern_Index+1)> cutoff
+                    delete(j)=1;
+                end
+                if pa.Distances(results.Match_Index{j},...
+                        results.Pattern_Index(j)+1) > cutoff
+                    delete(j)=1;
+                end
+                %Do something about double finds. For now, they ar
+                %interesting to look at. After they are better
+                %characterized, something can be done about it.
+                                
+                results.Pattern{j}=[results.Pattern{j} ...
+                    results.Pattern{j}+1];
+            end
+            delete=logical(delete);
+            results.Match(delete)=[];
+            results.Pattern(delete)=[];
+            results.Match_Index(delete)=[];
+            results.Pattern_Index(delete)=[];
+
+        end
+        function WriteToFile(results,ID,append)
+            num_objects=length(results.Pattern);
+            indices=cell(1,num_objects);
+            command=cell(1,num_objects);
+            filename=[ID '.pml'];
+            if ~append
+                fid=fopen(filename,'wt');
+                fprintf(fid, ['load ' ID '.pdb']);
+                fwrite(fid, sprintf('\n'));                                % terminate this line
+                fclose(fid);
+            end
+            for i=1:num_objects
+                fid=fopen(filename,'at');
+                indices{i}=[results.Pattern{i} results.Match{i}];
+                command{i}=['create ' results.Name(end) '_' ...
+                    num2str(results.Pattern{i}(1)) ', ' 'chain ' ...
+                    results.Name(end) ' and resi '];
+                fprintf(fid, command{i});
+                fclose(fid);
+                dlmwrite(filename,indices{i}, 'delimiter', '+',...
+                    '-append','newline','pc')
+            end
+        end
+    end
+end
+
+function [ Index ] = findresidues(NameArray, Pattern )
+%
+numrescheck=length(Pattern);
+tf=cell(1,numrescheck);
+
+for i=1:numrescheck
+    tf{i}=strcmp(Pattern{i},NameArray);
+end
+
+if numrescheck==1
+    Index=find(tf{1});
+    return
+end
+
+TF=(tf{1} & logical([tf{2}(2:end) 0]));
+
+if numrescheck > 2
+    for j=3:numrescheck
+        TF=TF & logical([tf{i}(j:end) zeros(1,j-1)]);
+    end
+end
+Index=find(TF);
+end
+##### SOURCE END #####
+-->
+   </body>
+</html>

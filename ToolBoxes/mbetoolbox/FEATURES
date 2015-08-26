@@ -1,0 +1,11 @@
+Broad class of substitution models (nt, aa and codon)
+Wide range of evolutionary distances
+Syn. & nonsyn substitution rate calculation and estimation
+Model/Tree parameter optimisation
+Site-specific rate estimation (ML and EB methods)
+Sequence evolution simulation
+Sliding window analysis
+
+Sophisticated visualisation
+High level functions to all operators
+Straightforward implementation - "not object-oriented"

@@ -1,0 +1,186 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>Class Definition: FullAtomModel</title>
+      <meta name="generator" content="MATLAB 7.7">
+      <meta name="date" content="2010-02-26">
+      <meta name="m-file" content="FullAtomModel"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1>Class Definition: FullAtomModel</h1>
+         <!--introduction-->
+         <p>FullAtomModel is basically an object that stores the relevent information in a PDB file. PDB files are parsed into structures,
+            not objects. This class is to give flexibility to the full atom model.
+         </p>
+         <!--/introduction-->
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#3">Properties section</a></li>
+               <li><a href="#4">Methods section</a></li>
+            </ul>
+         </div><pre class="codeinput"><span class="keyword">classdef</span> FullAtomModel &lt; handle
+</pre><pre class="codeinput">    <span class="comment">%FULLATOMMODEL Contains a parsed pdb file</span>
+    <span class="comment">% Contains just relevant information from the pdb structure</span>
+</pre><h2>Properties section<a name="3"></a></h2>
+         <p>This section defines the properties of the FullAtomModel class</p><pre class="codeinput">    properties (SetAccess = private)
+        Name                                                               <span class="comment">% The name should be the pdb ID, or custom name of choice</span>
+        Model                                                              <span class="comment">% This contains the model, structured just like in a pdb structure</span>
+    <span class="keyword">end</span>
+</pre><h2>Methods section<a name="4"></a></h2>
+         <p>Here the various functions that can operate on a FullAtomModel are defined</p><pre class="codeinput">    methods
+</pre><p><b>Instantiation function</b></p><pre class="codeinput">        <span class="keyword">function</span> FAM = FullAtomModel(name)                                 <span class="comment">% This creates a new instance of FullAtomModel</span>
+            <span class="keyword">if</span> nargin &lt; 1                                                  <span class="comment">% Assign a name if one is specified, otherwise call it un-named</span>
+                name=<span class="string">'un-named'</span>;
+            <span class="keyword">end</span>
+            FAM.Name  = name;                                              <span class="comment">% The Model property will automatically be set to an empty matrix []</span>
+        <span class="keyword">end</span>
+</pre><pre class="codeoutput">
+ans = 
+
+  FullAtomModel handle
+
+  Properties:
+     Name: 'un-named'
+    Model: []
+
+</pre><p><b>Puts actual information into the model from a pdb structure</b></p><pre class="codeinput">        <span class="keyword">function</span> PopulateFAM(FAM,pdb)
+            <span class="keyword">if</span> isfield(pdb.Model,<span class="string">'HeterogenAtom'</span>)                          <span class="comment">% If HeterogenAtoms are found in the pdb structure, include them</span>
+                FAM.Model=[pdb.Model.Atom pdb.Model.HeterogenAtom];
+            <span class="keyword">else</span>
+                FAM.Model = pdb.Model.Atom;                                <span class="comment">% Otherwise, just include what is in Model. X-ray is assumed, not NMR</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+</pre><p><b>Takes a subset of a FullAtomModel</b></p><pre class="codeinput">        <span class="keyword">function</span> CutFAM(FAM,subset,fam_orig)
+            <span class="keyword">if</span> nargin &lt; 3                                                  <span class="comment">% If a second FAM is not supplied, cut the first one</span>
+                FAM.Model=FAM.Model(subset);
+            <span class="keyword">else</span>
+                FAM.Model=fam_orig.Model(subset);                          <span class="comment">% If a second FAM is supplied, copy a subset of it into the first one</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+</pre><pre class="codeinput">    <span class="keyword">end</span>
+</pre><pre class="codeinput"><span class="keyword">end</span>
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.7<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% Class Definition: FullAtomModel
+% FullAtomModel is basically an object that stores the relevent information
+% in a PDB file. PDB files are parsed into structures, not objects. This
+% class is to give flexibility to the full atom model.
+%%
+classdef FullAtomModel < handle
+    %FULLATOMMODEL Contains a parsed pdb file
+    % Contains just relevant information from the pdb structure
+    %% Properties section
+    % This section defines the properties of the FullAtomModel class
+    
+    properties (SetAccess = private)
+        Name                                                               % The name should be the pdb ID, or custom name of choice
+        Model                                                              % This contains the model, structured just like in a pdb structure
+    end
+    
+    %% Methods section
+    % Here the various functions that can operate on a FullAtomModel are
+    % defined
+    
+    methods
+        %%
+        % *Instantiation function*
+        function FAM = FullAtomModel(name)                                 % This creates a new instance of FullAtomModel
+            if nargin < 1                                                  % Assign a name if one is specified, otherwise call it un-named
+                name='un-named';
+            end
+            FAM.Name  = name;                                              % The Model property will automatically be set to an empty matrix []
+        end
+        
+        %%
+        % *Puts actual information into the model from a pdb structure*
+        function PopulateFAM(FAM,pdb)
+            if isfield(pdb.Model,'HeterogenAtom')                          % If HeterogenAtoms are found in the pdb structure, include them
+                FAM.Model=[pdb.Model.Atom pdb.Model.HeterogenAtom];
+            else
+                FAM.Model = pdb.Model.Atom;                                % Otherwise, just include what is in Model. X-ray is assumed, not NMR
+            end
+        end
+        
+        %%
+        % *Takes a subset of a FullAtomModel*
+        function CutFAM(FAM,subset,fam_orig)
+            if nargin < 3                                                  % If a second FAM is not supplied, cut the first one
+                FAM.Model=FAM.Model(subset);
+            else
+                FAM.Model=fam_orig.Model(subset);                          % If a second FAM is supplied, copy a subset of it into the first one
+            end
+        end
+    end
+end
+##### SOURCE END #####
+-->
+   </body>
+</html>

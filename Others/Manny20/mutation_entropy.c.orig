@@ -1,0 +1,385 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+/* Level 1 Functions */
+
+char **get_sequences(FILE *ifp, long *num_sequences_ptr, long *seq_length_ptr);
+double **get_classes(FILE *ifp, long *alphabet_size_ptr, long *num_classes_ptr);
+double **compute_pop_fracs(double **classes, char **sequences, long num_sequences, long seq_length, long num_classes);
+double *compute_shannon_entropies(double **pop_fracs, long num_classes, long seq_length);
+double *compute_residue_entropies(double **pop_fracs, long num_classes, long seq_length);
+
+/* Level 2 Functions */
+
+double *assign_pop_fracs(double **classes, char *sequence, long num_classes, long length);
+double *compute_probs(double *pop_fracs, double *prob_vec, long num_classes);
+double double_random(void);
+
+/* Level 3 Functions */
+
+double **create_a_mat(double *pop_fracs, long num_classes);
+double *create_b_vec(double *pop_fracs, long num_classes);
+
+main()
+{
+	FILE *ifp1 = fopen("sequence_file.txt", "r");
+	FILE *ifp2 = fopen("class_defs.txt", "r");
+	FILE *ofp = fopen("entropy_file.txt", "w");
+	double **classes, **pop_fracs, **residue_entropies, *shannon_entropies; 
+	char **sequences;
+	long num_sequences, seq_length, alphabet_size;
+	long num_classes, num_iterations, seed, m, n;
+
+	printf("Please Enter the Number of Residue Entropy Sets to be Computed:  ");
+	scanf("%ld", &num_iterations);
+	printf("Please Enter a Random Number Seed:  ");
+	scanf("%ld", &seed);
+	srand(seed);
+
+	sequences = get_sequences(ifp1, &num_sequences, &seq_length);
+	classes = get_classes(ifp2, &alphabet_size, &num_classes);
+	pop_fracs = compute_pop_fracs(classes, sequences, num_sequences, seq_length, num_classes);
+	shannon_entropies = compute_shannon_entropies(pop_fracs, num_classes, seq_length);
+	residue_entropies = (double **) malloc(num_iterations*sizeof(double *));
+	for (n = 0; n < num_iterations; n++)
+		residue_entropies[n] = compute_residue_entropies(pop_fracs, num_classes, seq_length);
+
+	for (m = 0; m < seq_length; m++)
+	{
+		fprintf(ofp, "%ld %e ", m + 1, shannon_entropies[m]);
+		for (n = 0; n < num_iterations; n++)
+			fprintf(ofp, "%e ", residue_entropies[n][m]);
+		fprintf(ofp, "\n");
+	}
+
+	for (n = 0; n < alphabet_size; n++)
+		free(classes[n]);
+	free(classes);
+	for (n = 0; n < seq_length; n++)
+		free(pop_fracs[n]);
+	free(pop_fracs);
+	for (n = 0; n < num_iterations; n++)
+		free(residue_entropies[n]);
+	free(residue_entropies);
+	free(shannon_entropies);
+	for (n = 0; n < num_sequences; n++)
+		free(sequences[n]);
+	free(sequences);
+
+	fclose(ifp1);
+	fclose(ifp2);
+	fclose(ofp);
+}
+
+/* Level 1 Functions */
+
+char **get_sequences(FILE *ifp, long *num_sequences_ptr, long *seq_length_ptr)
+{
+	char **sequences, c;
+	long m, n;
+
+	fscanf(ifp, "%ld%ld", num_sequences_ptr, seq_length_ptr);;
+	while ((c = getc(ifp)) != '>')
+		;
+
+	sequences = (char **) malloc((*num_sequences_ptr)*sizeof(char *));
+	for (m = 0; m < *num_sequences_ptr; m++)
+	{
+		sequences[m] = (char *) malloc((*seq_length_ptr)*sizeof(char));
+		for (n = 0; n < *seq_length_ptr; n++)
+			sequences[m][n] = (char) getc(ifp);
+		c = getc(ifp);
+	}
+
+	return sequences;
+}
+
+double **get_classes(FILE *ifp, long *alphabet_size_ptr, long *num_classes_ptr)
+{
+	double **classes;
+	long m, n;
+
+	fscanf(ifp, "%ld%ld", alphabet_size_ptr, num_classes_ptr);
+
+	classes = (double **) malloc((*alphabet_size_ptr)*sizeof(double *));
+	for (m = 0; m < *alphabet_size_ptr; m++)
+	{
+		classes[m] = (double *) malloc((*num_classes_ptr)*sizeof(double));
+		for (n = 0; n < *num_classes_ptr; n++)
+			fscanf(ifp, "%lf", &(classes[m][n]));
+	}
+
+	return classes;
+}
+
+double **compute_pop_fracs(double **classes, char **sequences, long num_sequences, long seq_length, long num_classes)
+{
+	double **pop_fracs = (double **) malloc(seq_length*sizeof(double *));
+	char *sequence = (char *) malloc(num_sequences*sizeof(char));
+	long m, n;
+
+	for (m = 0; m < seq_length; m++)
+	{
+		for (n = 0; n < num_sequences; n++)
+			sequence[n] = sequences[n][m];
+		pop_fracs[m] = assign_pop_fracs(classes, sequence, num_classes, num_sequences);
+	}
+
+	free(sequence);
+
+	return pop_fracs;
+}
+
+double *compute_shannon_entropies(double **pop_fracs, long num_classes, long seq_length)
+{
+	double *shannon_entropies = (double *) malloc(seq_length*sizeof(double));
+	double zero = 1.0e-06;
+	long m, n;
+
+	for (m = 0; m < seq_length; m++)
+	{
+		shannon_entropies[m] = 0.0;
+		for (n = 0; n < num_classes; n++)
+			if (pop_fracs[m][n] > zero)
+				shannon_entropies[m] -= pop_fracs[m][n]*log(pop_fracs[m][n]);
+	}
+
+	return shannon_entropies;
+}
+
+double *compute_residue_entropies(double **pop_fracs, long num_classes, long seq_length)
+{
+	double *residue_entropies = (double *) malloc(seq_length*sizeof(double));
+	double *prob_vec = (double *) malloc((num_classes*num_classes - 2*num_classes + 1)*sizeof(double));
+	double *x_vec = (double *) malloc(num_classes*num_classes*sizeof(double));
+	double fac = double_random(), sum = 0.0, zero = 1.0e-06;
+	long i, j, m, n;
+
+	for (n = 0; n < num_classes*num_classes - 2*num_classes + 1; n++)
+	{
+		prob_vec[n] = double_random();
+		sum += prob_vec[n];
+	}
+	for (n = 0; n < num_classes*num_classes - 2*num_classes + 1; n++)
+		prob_vec[n] *= fac/sum;
+
+	for (n = 0; n < seq_length; n++)
+	{
+		x_vec = compute_probs(pop_fracs[n], prob_vec, num_classes);
+		residue_entropies[n] = 0.0;
+		for (i = 0; i < num_classes; i++)
+			for (j = 0; j < num_classes; j++)
+				if (x_vec[i*num_classes + j] > zero)
+					residue_entropies[n] -= pop_fracs[n][i]*x_vec[i*num_classes + j]*log(x_vec[i*num_classes + j]);
+	}
+	
+	free(x_vec);
+	free(prob_vec);
+
+	return residue_entropies;
+}
+
+/* Level 2 Functions */
+
+double *assign_pop_fracs(double **classes, char *sequence, long num_classes, long length)
+{
+	double *pop_fracs = (double *) malloc(num_classes*sizeof(double));
+	long m, n;
+	char c;
+
+	for (n = 0; n < num_classes; n++)
+		pop_fracs[n] = 0.0;
+
+	for (m = 0; m < length; m++)
+	{
+		c = sequence[m];
+		if (c == 'M')
+			for (n = 0; n < num_classes; n++)
+				pop_fracs[n] += classes[0][n];
+		else if (c == 'P')
+			for (n = 0; n < num_classes; n++)
+				pop_fracs[n] += classes[1][n];
+		else if (c == 'A')
+			for (n = 0; n < num_classes; n++)
+				pop_fracs[n] += classes[2][n];
+		else if (c == 'L')
+			for (n = 0; n < num_classes; n++)
+				pop_fracs[n] += classes[3][n];
+		else if (c == 'V')
+			for (n = 0; n < num_classes; n++)
+				pop_fracs[n] += classes[4][n];
+		else if (c == 'E')
+			for (n = 0; n < num_classes; n++)
+				pop_fracs[n] += classes[5][n];
+		else if (c == 'K')
+			for (n = 0; n < num_classes; n++)
+				pop_fracs[n] += classes[6][n];
+		else if (c == 'G')
+			for (n = 0; n < num_classes; n++)
+				pop_fracs[n] += classes[7][n];
+		else if (c == 'R')
+			for (n = 0; n < num_classes; n++)
+				pop_fracs[n] += classes[8][n];
+		else if (c == 'N')
+			for (n = 0; n < num_classes; n++)
+				pop_fracs[n] += classes[9][n];
+		else if (c == 'H')
+			for (n = 0; n < num_classes; n++)
+				pop_fracs[n] += classes[10][n];
+		else if (c == 'I')
+			for (n = 0; n < num_classes; n++)
+				pop_fracs[n] += classes[11][n];
+		else if (c == 'T')
+			for (n = 0; n < num_classes; n++)
+				pop_fracs[n] += classes[12][n];
+		else if (c == 'Q')
+			for (n = 0; n < num_classes; n++)
+				pop_fracs[n] += classes[13][n];
+		else if (c == 'Y')
+			for (n = 0; n < num_classes; n++)
+				pop_fracs[n] += classes[14][n];
+		else if (c == 'D')
+			for (n = 0; n < num_classes; n++)
+				pop_fracs[n] += classes[15][n];
+		else if (c == 'S')
+			for (n = 0; n < num_classes; n++)
+				pop_fracs[n] += classes[16][n];
+		else if (c == 'F')
+			for (n = 0; n < num_classes; n++)
+				pop_fracs[n] += classes[17][n];
+		else if (c == 'W')
+			for (n = 0; n < num_classes; n++)
+				pop_fracs[n] += classes[18][n];
+		else if (c == 'C')
+			for (n = 0; n < num_classes; n++)
+				pop_fracs[n] += classes[19][n];
+		else if (c == '-')
+			for (n = 0; n < num_classes; n++)
+				pop_fracs[n] += classes[20][n];
+	}
+
+	for (n = 0; n < num_classes; n++)
+		pop_fracs[n] /= length;
+
+	return pop_fracs;
+}
+
+double *compute_probs(double *pop_fracs, double *prob_vec, long num_classes)
+{
+	double **a_mat = create_a_mat(pop_fracs, num_classes);
+	double *b_vec = create_b_vec(pop_fracs, num_classes);
+	double *x_vec = (double *) malloc(num_classes*num_classes*sizeof(double));
+	long *row_idx = (long *) malloc((2*num_classes - 1)*sizeof(long));
+	long *col_idx = (long *) malloc(num_classes*num_classes*sizeof(long));
+	long num_rows = 2*num_classes - 1, num_cols = num_classes*num_classes;
+	long row, col, max_row, max_col, temp, i, j;
+	double fac, sum;
+	
+	for (row = 0; row < num_rows; row++)
+      row_idx[row] = row;
+	for (col = 0; col < num_cols; col++)
+      col_idx[col] = col;
+
+	for (row = 0; row < num_rows - 1; row++)
+	{
+		max_row = row;
+		max_col = row;
+		for (i = row; i < num_rows; i++)
+			for (j = row; j < num_cols; j++)
+				if (fabs(a_mat[row_idx[i]][col_idx[j]]) > fabs(a_mat[row_idx[max_row]][col_idx[max_col]]))
+				{
+					max_row = i;
+					max_col = j;
+				}
+      
+				temp = row_idx[row];
+				row_idx[row] = row_idx[max_row];
+				row_idx[max_row] = temp;
+    
+				temp = col_idx[row];
+				col_idx[row] = col_idx[max_col];
+				col_idx[max_col] = temp;
+
+				for (i = row + 1; i < num_rows; i++)
+				{
+					fac = a_mat[row_idx[i]][col_idx[row]]/a_mat[row_idx[row]][col_idx[row]];
+					for (j = row; j < num_cols; j++)
+						a_mat[row_idx[i]][col_idx[j]] -= fac*a_mat[row_idx[row]][col_idx[j]];
+					b_vec[row_idx[i]] -= fac*b_vec[row_idx[row]];
+				}
+	}
+
+	max_col = num_rows - 1;
+	for (j = num_rows - 1; j < num_cols; j++)
+		if (fabs(a_mat[row_idx[num_rows - 1]][col_idx[j]]) > fabs(a_mat[row_idx[num_rows - 1]][col_idx[max_col]]))
+			max_col = j;
+
+	temp = col_idx[num_rows - 1];
+	col_idx[num_rows - 1] = col_idx[max_col];
+	col_idx[max_col] = temp;
+
+	for (i = 0; i < num_cols - num_rows; i++)
+		x_vec[col_idx[num_rows + i]] = prob_vec[i];
+
+	for (row = num_rows - 1; row > -1; row--)
+    {
+		sum = 0.0;
+		for (col = row + 1; col < num_cols; col++)
+			sum += a_mat[row_idx[row]][col_idx[col]]*x_vec[col_idx[col]];
+
+		x_vec[col_idx[row]] = (b_vec[row_idx[row]] - sum)/a_mat[row_idx[row]][col_idx[row]];
+	}
+
+	for (row = 0; row < num_rows; row++)
+		free(a_mat[row]);
+	free(a_mat);
+	free(b_vec);
+	free(row_idx);
+	free(col_idx);
+
+	return x_vec;
+}
+
+double double_random(void)
+{
+	return ((double) rand())/RAND_MAX;
+}
+
+/* Level 3 Functions */
+
+double **create_a_mat(double *pop_fracs, long num_classes)
+{
+	double **a_mat = (double **) malloc((2*num_classes - 1)*sizeof(double *));
+	long row, col, i, j;
+
+	for (row = 0; row < 2*num_classes - 1; row++)
+	{
+		a_mat[row] = (double *) malloc(num_classes*num_classes*sizeof(double));
+		for (col = 0; col < num_classes*num_classes; col++)
+			a_mat[row][col] = 0.0;
+	}
+
+	for (i = 0; i < num_classes; i++)
+		for (j = 0; j < num_classes; j++)
+			a_mat[i][i*num_classes + j] = 1.0;
+	
+	for (i = 0; i < num_classes - 1; i++)
+		for (j = 0; j < num_classes; j++)
+			a_mat[num_classes + i][j*num_classes + i] = pop_fracs[j];
+
+	return a_mat;
+}
+
+double *create_b_vec(double *pop_fracs, long num_classes)
+{
+	double *b_vec = (double *) malloc((2*num_classes - 1)*sizeof(double));
+	long n;
+
+	for (n = 0; n < num_classes; n++)
+		b_vec[n] = 1.0;
+	for (n = 0; n < num_classes - 1; n++)
+		b_vec[num_classes + n] = pop_fracs[n];
+
+	return b_vec;
+}

@@ -1,0 +1,124 @@
+function OnionPlot(Pro,bins,keep)
+if nargin < 2
+    bins=7;
+end
+
+if strcmp(bins,'standard')
+    bins=[0, realmin, 1+realmin, 2+realmin, Inf];
+    standard=true;
+else
+    standard=false;
+end
+figure();
+if ~isempty(Pro.shell)
+    if nargin <3
+        keep=true(1,length(Pro.shell));
+    end
+    numshells=length(unique(Pro.shell(keep)));
+    minShell=min(unique(Pro.shell(keep)));
+    G=cell(1,numshells);
+    H=cell(1,numshells);
+    shells=cell(1,numshells);
+    numres=zeros(1,numshells);
+    for i=1:numshells
+        G{i}=Pro.variability(Pro.shell(keep)==i+minShell-1);
+        numres(i)=length(G{i});
+        if length(bins)==1
+            warning('This feature is currently invalid. Do not use.')
+            [H{i}, ~]=hist(G{i},bins);
+        else
+            H{i}=histc(G{i},bins);
+            H{i}(end)=[];
+        end
+        if size(H{i},1)~=1
+            H{i}=H{i}';
+        end
+        %                   shells{i}=['Shell ',num2str(i+minShell-1)];
+        %double wide
+        shells{i}=['Shell ',num2str(2*(i+minShell-1)-1),...
+            '+',num2str(2*(i+minShell-1))];
+    end
+    
+    if length(bins)==1
+        numbins=bins;
+    else
+        numbins=length(bins)-1;
+    end
+    z=cell2mat(H)';
+    d=reshape(z,numbins,numshells);
+    d=d./repmat(numres,numbins,1);
+    
+    %subplot(1,2,1),h=bar(d,.6);
+    h=bar(d,.6);
+    %recolor for ribosome shell
+    usedShells=minShell:minShell+numshells-1;
+    for i=1:length(h)
+        %                     switch usedShells(i)
+        %                         case {1,2}
+        %                             set(h(i),'FaceColor',[1 0 0]);
+        %                         case {3,4}
+        %                             set(h(i),'FaceColor',[0 1 0]);
+        %
+        %                         case {5,6}
+        %                             set(h(i),'FaceColor',[0 0 1]);
+        %
+        %                         case {7,8}
+        %                             set(h(i),'FaceColor',[.4784 .0627 .8941]);
+        %
+        %                         otherwise
+        %                             set(h(i),'FaceColor',[.8706 .4902 0]);
+        %                     end%
+        %double thickness
+        switch usedShells(i)
+            case 1
+                set(h(i),'FaceColor',[1 0 0]);
+            case 2
+                set(h(i),'FaceColor',[0 1 0]);
+                
+            case 3
+                set(h(i),'FaceColor',[0 0 1]);
+                
+            case 4
+                set(h(i),'FaceColor',[.5 0 1]);
+                
+            case 5
+                set(h(i),'FaceColor',[1 .5 0]);
+                
+            otherwise
+                set(h(i),'FaceColor',[.5 .5 .5]);
+        end
+        
+    end
+    legend(shells)
+else
+    numres=length(Pro.variability);
+    H=histc(Pro.variability,bins);
+    H(end)=[];
+    numbins=length(bins)-1;
+    d=H/numres;
+    %subplot(1,2,1),bar(d,.6);
+    bar(d,.6);
+end
+ylim([0,1])
+title(Pro.Name,'Interpreter','none')
+if standard
+    set(gca,'XTickLabel',{'Universally conserved',...
+        'Highly Conserved','Conserved','Variable'})
+else
+    binName=cell(1,numbins);
+    for i=1:numbins
+        binName{i}=[num2str(bins(i)),' - ',num2str(bins(i+1))];
+    end
+    xlabel('Shannon Entropy [bits]')
+    set(gca,'XTickLabel',binName)
+end
+ylabel('Frequeny of occurence','FontSize',16)
+%             subplot(1,2,2),plot(Pro.variability)
+%             xlabel('Residue number')
+%             ylabel('Shannon Entropy [bits]')
+%             ylim([-.1,4.4])
+title(Pro.Name,'Interpreter','none','FontSize',16)
+set(gca,'FontSize',16)
+legend off
+
+end

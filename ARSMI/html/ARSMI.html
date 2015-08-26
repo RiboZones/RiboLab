@@ -1,0 +1,325 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>Automatic RNA Structure Motif Identification (ARSMI)</title>
+      <meta name="generator" content="MATLAB 7.7">
+      <meta name="date" content="2010-02-28">
+      <meta name="m-file" content="ARSMI"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1>Automatic RNA Structure Motif Identification (ARSMI)</h1>
+         <!--introduction--><pre>     This is the main function of the ARSMI program. It will parse one
+PDB file, convert its information into various classes, and output
+results according to the desired method.
+Describe input arguments here.</pre>
+         <!--/introduction--><h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#2">Input processing block</a></li>
+               <li><a href="#6">Make FullAtomModel object</a></li>
+               <li><a href="#10">Main block</a></li>
+               <li><a href="#15">Output processing block</a></li>
+            </ul>
+         </div><pre class="codeinput"><span class="keyword">function</span> [ResultsVar Model]=ARSMI(fileID,Method,Pattern,SelectedChains,FAM)
+</pre><h2>Input processing block<a name="2"></a></h2><pre>     The user may indicate their pdb file by one of three ways. They may
+state just the PDB ID code, in which case the PDB file would need
+to be downloaded. They may enter just a file name, in which case
+MATLAB will look in their current directory for the pdb file.
+Alternatively, they could pass an entire path to the PDB file, in
+which case a new copy would be desired in the working directory.
+This code will determine the PDB ID code and the local filename,
+without a path. It then will load the PDB file from disk or the
+internet. This code also allows for supplying an optional pre-made
+FullAtomModel object.</pre><pre>1. Determine if using internet or local mode</pre><pre class="codeinput"><span class="keyword">if</span> length(fileID) == 4                                                     <span class="comment">% A fileID can only be a valid PDB ID if and only if it is exactly 4 characters</span>
+    internet=true;
+<span class="keyword">else</span>
+    internet=false;                                                        <span class="comment">% The minimum file name length would be 5, *.pdb</span>
+<span class="keyword">end</span>
+</pre><pre>2. Determine ID and file name</pre><pre class="codeinput"><span class="keyword">if</span> internet                                                                <span class="comment">% In internet mode, fileID is the same as PDB ID</span>
+    ID=fileID;
+    file=strcat(ID,<span class="string">'.pdb'</span>);                                                <span class="comment">% A .pdb extension is needed</span>
+<span class="keyword">else</span>
+    backslash=findstr(<span class="string">'\'</span>,fileID);                                         <span class="comment">% Determine if a path or just a file name was given</span>
+    <span class="keyword">if</span> backslash
+        ID=fileID(backslash(end)+1:end-4);                                 <span class="comment">% If a path was given the ID would be the information after the last backslash,</span>
+        file=fileID;                                                       <span class="comment">%    not counting the .pdb at the end</span>
+        copyfile(file,<span class="string">'./'</span>);                                               <span class="comment">% Copy the pdb file to the working directory for convenience</span>
+    <span class="keyword">else</span>
+        ID=fileID(1:end-4);                                                <span class="comment">% If no backslashes were found, the ID would just be the file name without the .pdb</span>
+        file=fileID;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><pre>3. Import PDB file</pre><pre class="codeinput"><span class="keyword">if</span> exist(<span class="string">'FAM'</span>,<span class="string">'var'</span>) &amp;&amp; strcmp(class(FAM),<span class="string">'FullAtomModel'</span>)                <span class="comment">% If a valid FullAtomModel has been supplied, a pdb file is not needed</span>
+    pdb=<span class="string">'none supplied'</span>;
+<span class="keyword">else</span>
+    <span class="keyword">if</span> internet
+        pdb = getpdb(ID, <span class="string">'ToFile'</span>, file);                                  <span class="comment">% Get the pdb entry from the database through the internet</span>
+    <span class="keyword">else</span>
+        pdb=importdata(file);                                              <span class="comment">% Import a pdb file from disk</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2>Make FullAtomModel object<a name="6"></a></h2><pre>     This block creates a FullAtomModel object if one was not supplied.
+It then determines which chains to process. Finally, it pre-generates the
+dynamic names of each chain, pseudo atom, and result file.</pre><pre>1. Make the FullAtomModel object if none is supplied</pre><pre class="codeinput"><span class="keyword">if</span> ~exist(<span class="string">'FAM'</span>,<span class="string">'var'</span>) || ~strcmp(class(FAM),<span class="string">'FullAtomModel'</span>)              <span class="comment">% If a valid FullAtomModel was not supplied, create it</span>
+    FAM=FullAtomModel(ID);                                                 <span class="comment">% Instantiate</span>
+    FAM.PopulateFAM(pdb);                                                  <span class="comment">% Populate the model with data from the pdb sructure</span>
+<span class="keyword">end</span>
+</pre><pre>2. Determine which chains to process and how many there are</pre><pre class="codeinput"><span class="keyword">if</span> exist(<span class="string">'SelectedChains'</span>,<span class="string">'var'</span>) &amp;&amp; iscellstr(SelectedChains)              <span class="comment">% If a list of strings is supplied, use it</span>
+    NameOfChains=SelectedChains;
+<span class="keyword">else</span>
+    NameOfChains=unique({FAM.Model.chainID});                              <span class="comment">% Otherwise, do all chains</span>
+<span class="keyword">end</span>
+num_chains=length(NameOfChains);                                           <span class="comment">% Find the number of chains</span>
+</pre><pre>3. Determine field names for chains, pseudo atoms models, and results</pre><pre class="codeinput">ChainName=cell(1,num_chains);                                              <span class="comment">% Pre-allocate these variables for speed</span>
+PseudoAtomName=cell(1,num_chains);
+ResultsName=cell(1,num_chains);
+
+<span class="keyword">for</span> index=1:num_chains                                                     <span class="comment">% Pre-determine the name of all chains, pseudo atoms model, and results</span>
+    ChainName{index}=strcat(<span class="string">'Chain'</span>,<span class="string">'_'</span>,NameOfChains{index});
+    PseudoAtomName{index}=strcat(<span class="string">'PseudoAtom_Chain_'</span>,NameOfChains{index});
+    ResultsName{index}=strcat(<span class="string">'Results_Chain_'</span>,NameOfChains{index});
+<span class="keyword">end</span>
+</pre><h2>Main block<a name="10"></a></h2><pre>     This is the main program block. First, it generates chain objects,
+next it generates psudo atom objects, and finally it computes the
+results.</pre><pre class="codeinput"><span class="keyword">for</span> index=1:num_chains                                                     <span class="comment">% Start the main block loop</span>
+</pre><pre>1. Make the chain object</pre><pre class="codeinput">    chain.(ChainName{index})=Chain(ID,NameOfChains{index});                <span class="comment">% Instantiate</span>
+    chain.(ChainName{index}).CreateChain(FAM,NameOfChains{index});         <span class="comment">% Build the chain</span>
+</pre><pre>2. Make the pseudo atom object</pre><pre class="codeinput">    pa.(PseudoAtomName{index})=PseudoAtoms(strcat(ID,<span class="string">'_'</span>,<span class="keyword">...</span><span class="comment">               % Instantiate</span>
+        ChainName{index}));
+    pa.(PseudoAtomName{index}).CenterOfMass(chain.(ChainName{index}<span class="keyword">...</span><span class="comment">     % Find the center of masses</span>
+        ).residues,Method.CenterOfMass);
+    pa.(PseudoAtomName{index}).DistanceBetweenPA();                        <span class="comment">% Compute the inter-atomic distances</span>
+</pre><pre>3. Find results based on search method.</pre><pre class="codeinput">    results.(ResultsName{index})=Results(pa.(PseudoAtomName{index}).Name); <span class="comment">% Instantiate</span>
+    <span class="keyword">switch</span> Method.Search{1}
+        <span class="keyword">case</span> {<span class="string">'Triangle'</span>,<span class="string">'Linear'</span>}
+            cutoff=Method.Search{2};
+            results.(ResultsName{index}).FindNearby(<span class="keyword">...</span><span class="comment">                    $ Find nearby residues</span>
+                pa.(PseudoAtomName{index}),Pattern,<span class="keyword">...</span>
+                chain.(ChainName{index}).residues.ListOfResidues,cutoff);
+            <span class="keyword">if</span> length(Pattern{1}) &gt; 1
+                results.(ResultsName{index}).Triangle<span class="keyword">...</span><span class="comment">                   % Restrict results using the Triangle method</span>
+                    (pa.(PseudoAtomName{index}),cutoff);
+            <span class="keyword">end</span>
+        <span class="keyword">otherwise</span>
+            warning(<span class="string">'No valid Search Method specified. Results are blank.'</span>)
+    <span class="keyword">end</span>
+    results.(ResultsName{index}).WriteToFile(ID,index-1);                  <span class="comment">% Write the results to a PyMOL script</span>
+</pre><pre class="codeinput"><span class="keyword">end</span>
+</pre><h2>Output processing block<a name="15"></a></h2>
+         <p>This block just assigns variables to a Model structure, and renames the results.</p><pre class="codeinput">Model.PDB=pdb;
+Model.FAM=FAM;
+Model.Chains=chain;
+Model.Pseudo_Atoms=pa;
+ResultsVar=results;
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.7<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% Automatic RNA Structure Motif Identification (ARSMI)
+%       This is the main function of the ARSMI program. It will parse one 
+% PDB file, convert its information into various classes, and output
+% results according to the desired method.
+% Describe input arguments here.
+%%
+function [ResultsVar Model]=ARSMI(fileID,Method,Pattern,SelectedChains,FAM)
+%% Input processing block
+%       The user may indicate their pdb file by one of three ways. They may
+% state just the PDB ID code, in which case the PDB file would need
+% to be downloaded. They may enter just a file name, in which case
+% MATLAB will look in their current directory for the pdb file.
+% Alternatively, they could pass an entire path to the PDB file, in
+% which case a new copy would be desired in the working directory.
+% This code will determine the PDB ID code and the local filename,
+% without a path. It then will load the PDB file from disk or the
+% internet. This code also allows for supplying an optional pre-made
+% FullAtomModel object.
+
+
+%%
+%  1. Determine if using internet or local mode
+ 
+if length(fileID) == 4                                                     % A fileID can only be a valid PDB ID if and only if it is exactly 4 characters
+    internet=true;                                                         
+else
+    internet=false;                                                        % The minimum file name length would be 5, *.pdb
+end
+
+%%
+%  2. Determine ID and file name
+
+if internet                                                                % In internet mode, fileID is the same as PDB ID
+    ID=fileID;
+    file=strcat(ID,'.pdb');                                                % A .pdb extension is needed
+else
+    backslash=findstr('\',fileID);                                         % Determine if a path or just a file name was given
+    if backslash
+        ID=fileID(backslash(end)+1:end-4);                                 % If a path was given the ID would be the information after the last backslash,
+        file=fileID;                                                       %    not counting the .pdb at the end
+        copyfile(file,'./');                                               % Copy the pdb file to the working directory for convenience
+    else
+        ID=fileID(1:end-4);                                                % If no backslashes were found, the ID would just be the file name without the .pdb
+        file=fileID;
+    end
+end
+
+%%
+%  3. Import PDB file
+if exist('FAM','var') && strcmp(class(FAM),'FullAtomModel')                % If a valid FullAtomModel has been supplied, a pdb file is not needed
+    pdb='none supplied';
+else
+    if internet
+        pdb = getpdb(ID, 'ToFile', file);                                  % Get the pdb entry from the database through the internet
+    else
+        pdb=importdata(file);                                              % Import a pdb file from disk
+    end
+end
+
+%% Make FullAtomModel object
+%       This block creates a FullAtomModel object if one was not supplied. 
+% It then determines which chains to process. Finally, it pre-generates the
+% dynamic names of each chain, pseudo atom, and result file.
+
+%%
+%  1. Make the FullAtomModel object if none is supplied
+if ~exist('FAM','var') || ~strcmp(class(FAM),'FullAtomModel')              % If a valid FullAtomModel was not supplied, create it
+    FAM=FullAtomModel(ID);                                                 % Instantiate
+    FAM.PopulateFAM(pdb);                                                  % Populate the model with data from the pdb sructure
+end
+
+%%
+%  2. Determine which chains to process and how many there are
+if exist('SelectedChains','var') && iscellstr(SelectedChains)              % If a list of strings is supplied, use it 
+    NameOfChains=SelectedChains;
+else
+    NameOfChains=unique({FAM.Model.chainID});                              % Otherwise, do all chains
+end
+num_chains=length(NameOfChains);                                           % Find the number of chains
+
+%%
+%  3. Determine field names for chains, pseudo atoms models, and results
+ChainName=cell(1,num_chains);                                              % Pre-allocate these variables for speed
+PseudoAtomName=cell(1,num_chains);
+ResultsName=cell(1,num_chains);
+
+for index=1:num_chains                                                     % Pre-determine the name of all chains, pseudo atoms model, and results
+    ChainName{index}=strcat('Chain','_',NameOfChains{index});
+    PseudoAtomName{index}=strcat('PseudoAtom_Chain_',NameOfChains{index});
+    ResultsName{index}=strcat('Results_Chain_',NameOfChains{index});
+end
+
+%% Main block
+%       This is the main program block. First, it generates chain objects,
+% next it generates psudo atom objects, and finally it computes the
+% results.
+
+for index=1:num_chains                                                     % Start the main block loop
+    %% 
+    %  1. Make the chain object
+    chain.(ChainName{index})=Chain(ID,NameOfChains{index});                % Instantiate
+    chain.(ChainName{index}).CreateChain(FAM,NameOfChains{index});         % Build the chain
+    
+    %%
+    %  2. Make the pseudo atom object
+    pa.(PseudoAtomName{index})=PseudoAtoms(strcat(ID,'_',...               % Instantiate
+        ChainName{index}));
+    pa.(PseudoAtomName{index}).CenterOfMass(chain.(ChainName{index}...     % Find the center of masses
+        ).residues,Method.CenterOfMass);
+    pa.(PseudoAtomName{index}).DistanceBetweenPA();                        % Compute the inter-atomic distances
+    
+    %%
+    %  3. Find results based on search method.
+    results.(ResultsName{index})=Results(pa.(PseudoAtomName{index}).Name); % Instantiate
+    switch Method.Search{1}
+        case {'Triangle','Linear'} 
+            cutoff=Method.Search{2};
+            results.(ResultsName{index}).FindNearby(...                    $ Find nearby residues
+                pa.(PseudoAtomName{index}),Pattern,...
+                chain.(ChainName{index}).residues.ListOfResidues,cutoff);
+            if length(Pattern{1}) > 1
+                results.(ResultsName{index}).Triangle...                   % Restrict results using the Triangle method
+                    (pa.(PseudoAtomName{index}),cutoff);
+            end
+        otherwise
+            warning('No valid Search Method specified. Results are blank.')
+    end
+    results.(ResultsName{index}).WriteToFile(ID,index-1);                  % Write the results to a PyMOL script
+end
+%% Output processing block
+% This block just assigns variables to a Model structure, and renames the
+% results. 
+
+Model.PDB=pdb;
+Model.FAM=FAM;
+Model.Chains=chain;
+Model.Pseudo_Atoms=pa;
+ResultsVar=results;
+
+##### SOURCE END #####
+-->
+   </body>
+</html>

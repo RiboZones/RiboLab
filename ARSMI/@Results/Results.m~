@@ -1,0 +1,363 @@
+%% DOCUMENT TITLE
+% INTRODUCTORY TEXT
+%%
+classdef Results < handle
+    %UNTITLED Summary of this class goes here
+    %   Detailed explanation goes here
+    
+    properties
+        Name
+        Pattern
+        Pattern_chain
+        Match
+        Match_chain
+        Original_Index
+        Original_FoundResidues
+        Pattern_Index
+        Match_Index
+        
+    end
+    
+    %% SECTION TITLE
+    % DESCRIPTIVE TEXT
+    
+    methods
+        function results = Results(name)
+            results.Name=name;
+        end
+        function FindNearby(results,PA,pattern,residue_list,cutoff)
+            if nargin < 5
+                cutoff=6;
+            end
+            Index = findresidues(PA.NamesOfPseudoAtoms, pattern{1});
+            
+            num_res=length(Index);
+            FoundRes=cell(1,num_res);
+            results.Match=cell(1,num_res);
+            results.Pattern=cell(1,num_res);
+            not_empty=zeros(1,num_res);
+            
+            %here it is assumed only one residue is in Pattern{2}. Future
+            %support may require adjustments to this.
+            for i=1:num_res
+                
+                NN=nearestneighbour(PA.Position{Index(i)}',cell2mat(PA.Position')','r',cutoff);
+                if strcmp(pattern{2},'*')
+                    FoundRes{i}=NN;
+                else
+                    FoundRes{i}=intersect(NN,find(strcmp(pattern{2},PA.NamesOfPseudoAtoms)));
+                end
+                FoundRes{i}=setdiff(FoundRes{i},Index(i));
+                results.Match{i}=residue_list(FoundRes{i});
+                results.Pattern{i}=residue_list(Index(i));
+                not_empty(i)=~isempty(results.Match{i});
+            end
+            results.Pattern=results.Pattern(logical(not_empty));
+            results.Match=results.Match(logical(not_empty));
+            results.Match_Index=FoundRes(logical(not_empty));
+            results.Pattern_Index=Index(logical(not_empty));
+            results.Original_FoundResidues=FoundRes;
+            results.Original_Index=Index;
+            results.Pattern_chain=results.Name(end);
+            results.Match_chain  =results.Name(end);
+            if isempty(results.Match)
+                warning('No matches were found. Results will be blank.')
+            end
+        end
+        function BondedSegment(results,PA,pattern,residue_list)
+            Index = findresidues(PA.NamesOfPseudoAtoms, pattern{1});
+            
+            results.Pattern_Index=Index;
+            results.Match_Index=Index+1;
+            results.Match=residue_list(results.Match_Index);
+            results.Pattern=residue_list(results.Pattern_Index);
+%             results.Original_FoundResidues=residue_list(Index);
+%             results.Original_Index=Index;
+            results.Pattern_chain=results.Name(end);
+            results.Match_chain  =results.Name(end);
+            if isempty(results.Match)
+                warning('No matches were found. Results will be blank.')
+            end
+            results.Pattern_Index=num2cell(results.Pattern_Index);
+            results.Pattern=num2cell(results.Pattern);
+            results.Match_Index=num2cell(results.Match_Index);
+            results.Match=num2cell(results.Match);
+        end
+        
+        function Intermediate=Triangle(results,model,settings)
+            %still need to add support for the case of using a triangle
+            %method, but with a larger search string. I don't know why
+            %anyone would want to do that, but still it should be done.
+            %%
+           
+            cutcut=settings.cutoff^2;
+            if length(results)==1
+                Positions=cell2mat(model(1).pa.Position')';
+                Pind=results.Pattern_Index;
+                KeepA=sum((Positions(:,Pind) - Positions(:,Pind+1)).^2) <= cutcut;
+                
+                numPatterns=length(results.Pattern_Index);
+                for i=1:numPatterns
+                    KeepB=sum(( Positions(:,results.Match_Index{i}) - ...
+                        repmat(Positions(:,Pind(i)+1),...
+                        [1 length(results.Match_Index{i})]) ).^2) <= cutcut;
+                    FalseB=ismember(results.Match_Index{i},[Pind(i),Pind(i)+1]);
+                    results.Match_Index{i}=results.Match_Index{i}(KeepB & ~FalseB);
+                    results.Match{i}=results.Match{i}(KeepB & ~FalseB);
+                    if isempty(results.Match_Index{i})
+                        KeepA(i)=0;
+                    end
+                end
+                results.Match=results.Match(KeepA);
+                results.Pattern=results.Pattern(KeepA);
+                results.Match_Index=results.Match_Index(KeepA);
+                results.Pattern_Index=results.Pattern_Index(KeepA);
+                results.Pattern_Index=num2cell(results.Pattern_Index);
+                results.Pattern_chain=results.Name(end);
+                results.Match_chain  =results.Name(end);
+            else
+                A1ind=cell2mat(results(1).Pattern_Index);
+                A2ind=cell2mat(results(1).Match_Index);
+                Bind=cell2mat(results(2).Pattern_Index);
+                Positions{1}=cell2mat(model(1).pa.Position')';
+                Positions{2}=cell2mat(model(2).pa.Position')';
+                % Find A1 near B, and A2 near B
+                
+                nnA1B=nearestneighbour(Positions{1}(:,A1ind),...
+                    Positions{2}(:,Bind),'r', settings.cutoff);
+                nnA2B=nearestneighbour(Positions{1}(:,A2ind),...
+                    Positions{2}(:,Bind),'r', settings.cutoff);
+                
+                keepP=logical(nnA1B(1,:))& logical(nnA2B(1,:));
+                keepPf=find(keepP);
+                                
+                numMatches=length(keepPf);
+                NewMatch_Index=cell(1,numMatches);
+                NewMatch=cell(1,numMatches);
+                NewPattern_Index=cell(1,numMatches);
+                NewPattern=cell(1,numMatches);                        
+                keep=true(1,numMatches);
+                for i=1:numMatches
+                    NewPattern_Index{i}=[A1ind(keepPf(i)),A2ind(keepPf(i))];
+                    NewPattern{i}=[results(1).Pattern{keepPf(i)},results(1).Match{keepPf(i)}];
+                    NewMatch_Index{i}=intersect(Bind(nnA1B(nnA1B(:,keepPf(i))~=0,...
+                        keepPf(i))'),Bind(nnA2B(nnA2B(:,keepPf(i))~=0,...
+                        keepPf(i))'));               
+                    NewMatch{i}=intersect([results(2).Pattern{nnA1B(nnA1B(:,...
+                        keepPf(i))~=0,keepPf(i))'}],...
+                        [results(2).Pattern{nnA2B(nnA2B(:,...
+                        keepPf(i))~=0,keepPf(i))'}]);
+                    NewMatch_Index{i}=setdiff(NewMatch_Index{i},NewPattern_Index{i}); 
+                    NewMatch{i}=setdiff(NewMatch{i},NewPattern{i});
+                    if isempty(NewMatch_Index{i})
+                        keep(i)=0;
+                    end
+                end           
+                % rebuild results object
+                
+                Intermediate = Results([results(:).Name]);
+                Intermediate.RebuildResults(NewPattern(keep),...
+                            NewMatch(keep),NewPattern_Index(keep),NewMatch_Index(keep))
+                Intermediate.Pattern_chain=results(1).Pattern_chain;
+                Intermediate.Match_chain=results(2).Pattern_chain;    
+            end
+            if isempty(NewMatch_Index)
+                warning('No matches were found. Results will be blank.')
+            end
+                  
+        end
+        
+        function Intermediate=Linear(results,model,settings)
+            if length(results)==1
+                results.Pattern_Index=num2cell(results.Pattern_Index);
+                results.Pattern_chain=results.Name(end);
+                results.Match_chain  =results.Name(end);
+            else
+                Pind=cell2mat(results(1).Pattern_Index);
+                Mind=cell2mat(results(2).Pattern_Index);
+                Positions{1}=cell2mat(model(1).pa.Position')';
+                Positions{2}=cell2mat(model(2).pa.Position')';
+                
+                nnP=nearestneighbour(Positions{1}(:,Pind),...
+                    Positions{2}(:,Mind),'r', settings.cutoff);
+                keepP=logical(nnP(1,:));
+                keepPf=find(keepP);
+                
+                switch settings.SearchMethod
+                    case 'StrictLinear'
+                        if length(keepPf)==length(keepP)
+                            keepP=logical(nnP(2,:));
+                            nnP=nnP(2:end,:);
+                            keepPf=find(nnP~=0)';
+                        end
+                        
+                        Patterns=meshgrid(1:size(nnP,2),1:size(nnP,1));
+                        NewPattern_Index=num2cell([results(1).Pattern_Index{Patterns(keepPf)}]);
+                        NewPattern=num2cell([results(1).Pattern{Patterns(keepPf)}]);
+                        NewMatch_Index=num2cell(nnP(keepPf));
+                        NewMatch=num2cell([results(1).Pattern{nnP(keepPf)}]);
+                        keep=true(1,length(keepPf));
+                        
+                    case 'Linear'
+                
+                        numMatches=length(keepPf);
+                        NewMatch_Index=cell(1,numMatches);
+                        NewMatch=cell(1,numMatches);
+                        
+                        NewPattern_Index=num2cell(Pind(keepPf));
+                        NewPattern=num2cell([results(1).Pattern{keepPf}]);
+                        keep=true(1,numMatches);
+                        for i=1:numMatches
+                            NewMatch_Index{i}=Mind(nnP(nnP(:,keepPf(i))~=0,keepPf(i))');
+                            NewMatch{i}=[results(2).Pattern{nnP(nnP(:,keepPf(i))~=0,keepPf(i))'}];
+                            if isempty(NewMatch_Index{i})
+                                keep(i)=0;
+                            end
+                        end
+                        
+                    case 'Base Pair'
+ 
+                        numMatches=length(keepPf);
+                        NewMatch_Index=cell(1,numMatches);
+                        NewMatch=cell(1,numMatches);
+                        
+                        NewPattern_Index=num2cell(Pind(keepPf));
+                        NewPattern=num2cell([results(1).Pattern{keepPf}]);
+                        keep=true(1,numMatches);
+                        for i=1:numMatches
+                            NewMatch_Index{i}=Mind(nnP(nnP(:,keepPf(i))~=0,keepPf(i))');
+                            NewMatch{i}=[results(2).Pattern{nnP(nnP(:,keepPf(i))~=0,keepPf(i))'}];
+                            NewMatch_Index{i}=NewMatch_Index{i}(~ismember(NewMatch_Index{i},...
+                                NewPattern_Index{i}-1:NewPattern_Index{i}+1));
+                            NewMatch{i}=NewMatch{i}(~ismember(NewMatch_Index{i},...
+                                NewPattern_Index{i}-1:NewPattern_Index{i}+1));
+                            if isempty(NewMatch_Index{i})
+                                keep(i)=0;
+                            end
+                        end
+                        
+                    otherwise
+                end
+                Intermediate = Results([results(:).Name]);
+                Intermediate.RebuildResults(NewPattern(keep),...
+                    NewMatch(keep),NewPattern_Index(keep),NewMatch_Index(keep));
+                Intermediate.Pattern_chain=results(1).Pattern_chain;
+                Intermediate.Match_chain=results(2).Match_chain;
+                
+            end
+        end
+        
+        function Identity(results,PA,pattern,residue_list)
+            Index = findresidues(PA.NamesOfPseudoAtoms, pattern{1});
+            
+            num_res=length(Index);
+            FoundRes=cell(1,num_res);
+            results.Match=cell(1,num_res);
+            results.Pattern=cell(1,num_res);
+            not_empty=zeros(1,num_res);
+            
+            for i=1:num_res
+                FoundRes{i}=Index(i);
+                results.Match{i}=residue_list(FoundRes{i});
+                results.Pattern{i}=residue_list(Index(i));
+                not_empty(i)=~isempty(results.Match{i});
+            end
+            results.Pattern=results.Pattern(logical(not_empty));
+            results.Match=results.Match(logical(not_empty));
+            results.Match_Index=FoundRes(logical(not_empty));
+            results.Pattern_Index=Index(logical(not_empty));                    
+            results.Pattern_Index=num2cell(results.Pattern_Index);
+            results.Original_FoundResidues=FoundRes;
+            results.Original_Index=Index;
+            results.Pattern_chain=results.Name(end);
+            results.Match_chain  =results.Name(end);
+            if isempty(results.Match)
+                warning('No matches were found. Results will be blank.')
+            end
+            
+        end
+        
+        function RebuildResults(results,Pattern,Match,Pattern_Index,Match_Index)
+            results.Pattern=Pattern;
+            results.Match=Match;
+            results.Pattern_Index=Pattern_Index;
+            results.Match_Index=Match_Index;
+        end
+        
+        function Extend(results,extend)
+            %broken assumption of continuity. Do not use.
+            for i=1:length(results.Pattern_Index)
+                results.Match{i}=repmat(results.Match{i}',[1,extend(2)])...
+                    + meshgrid(0:extend(2)-1,1:length(results.Match{i}));
+                results.Pattern{i}=repmat(results.Pattern{i}',[1,extend(1)])...
+                    + meshgrid(0:extend(1)-1,1:length(results.Pattern{i}));
+                results.Match_Index{i}=repmat(results.Match_Index{i}',[1,extend(2)])...
+                    + meshgrid(0:extend(2)-1,1:length(results.Match_Index{i}));
+                results.Pattern_Index{i}=repmat(results.Pattern_Index{i}',[1,extend(1)])...
+                    + meshgrid(0:extend(1)-1,1:length(results.Pattern_Index{i}));
+            end
+        end
+       
+        function WriteToFile(results,ID,append,CustomName)
+            num_objects=length(results.Pattern);
+            command=cell(1,num_objects);
+            if nargin==4
+                ID=CustomName(1:end-4);
+            end
+            filename=[ID '.pml'];
+            if ~append
+                fid=fopen(filename,'wt');
+                fprintf(fid, ['load ' ID '.pdb']);
+                fwrite(fid, sprintf('\n'));                                % terminate this line
+                fclose(fid);
+            end
+            for i=1:num_objects         
+                fid=fopen(filename,'at');
+                command{i}=['create ' results.Pattern_chain '_' ...
+                    num2str(results.Pattern{i}(1)) ', ' 'chain ' ...
+                    results.Pattern_chain ' and resi '];
+                fprintf(fid, command{i});
+                fprintf(fid,'%d',results.Pattern{i}(1));
+                if length(results.Pattern{i})>1
+                    fprintf(fid,'+%d',results.Pattern{i}(2:end));
+                end
+                command{i}=[' or chain ' results.Match_chain ' and resi '];
+                fprintf(fid, command{i});
+                fprintf(fid,'%d',results.Match{i}(1));
+                if length(results.Match{i})>1
+                    fprintf(fid,'+%d',results.Match{i}(2:end));
+                end
+                fprintf(fid,'\r\n');
+                fclose(fid);
+            end
+        end
+    end
+end
+
+function [ Index ] = findresidues(NameArray, Pattern )
+%
+if strcmp(Pattern,'*')
+    Index=find(ones(size(NameArray)));    
+    return
+end
+numrescheck=length(Pattern);
+tf=cell(1,numrescheck);
+
+for i=1:numrescheck
+    tf{i}=strcmp(Pattern{i},NameArray);
+end
+
+if numrescheck==1
+    Index=find(tf{1});
+    return
+end
+
+TF=(tf{1} & logical([tf{2}(2:end) 0]));
+
+if numrescheck > 2
+    for j=3:numrescheck
+        TF=TF & logical([tf{i}(j:end) zeros(1,j-1)]);
+    end
+end
+Index=find(TF);
+end

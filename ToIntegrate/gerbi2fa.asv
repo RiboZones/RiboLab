@@ -1,0 +1,13 @@
+function [ FastaFile ] = gerbi2fa( file )
+%UNTITLED Summary of this function goes here
+%   Detailed explanation goes here
+table_format = fileread(file);
+
+SequenceData=regexp(table_format,'(?<Species_Abv>[\w\d]{8,8})\t(?<accession>[\w\d]+)\t(?<Species_Name>[^\t]+)\t(?<Sequence>[^\n]+)','names');
+FastaFile=struct();
+
+for i=1:length(SequenceData)
+    FastaFile(i).Header=[SequenceData(i).Species_Name,'|',SequenceData(i).Species_Abv,,;
+    FastaFile(i).Sequence=SequenceData(i).Sequence;
+end
+

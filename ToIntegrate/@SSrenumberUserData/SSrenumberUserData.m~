@@ -1,0 +1,30 @@
+classdef SSrenumberUserData < handle
+    %UNTITLED Summary of this class goes here
+    %   Detailed explanation goes here
+    
+    properties
+        Name
+        pdbA
+        pdbB
+        pdbA_file='./';
+        pdbB_file='./';
+        FAM_A
+        chain_Achain_A
+        pa_A
+        pa_A
+    end
+    
+    methods
+        function SSUD=SSrenumberUserData()
+        end
+        
+        
+    end
+    
+endFAM_A=FullAtomModel('A');
+    FAM_A.PopulateFAM(obj.pdbA);
+    chainsA = cellstr(get(handles.ChainID_A,'String'));
+    chain_A=Chain(FAM_A.Name,chainsA{get(handles.ChainID_A,'Value')});
+    chain_A.CreateChain(FAM_A,chainsA{get(handles.ChainID_A,'Value')});
+    pa_A=PseudoAtoms('A');
+    pa_A.CenterOfMass(chain_A.residues,'Base only');
