@@ -1,32 +1,35 @@
-function [ output_args ] = PyMOL_Species_Convert( pml_file, prefix, speciesCodes, newMoleculeName, Alignment, ItemListA, ItemListB )
+function [ output_args ] = RiboVision_Species_Convert( rv_file, prefix, speciesCodes, newMoleculeName, Alignment, ItemListA, ItemListB )
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
-textfile=fileread(pml_file);
-ParsedSelections=regexp(textfile,'create (?<seleName>[^,]+), (?<moleName>[^\W]+) and \((?<resi>[^\)]+)[^c]+color\s(?<color>[^,]+)','names');
-
-if isempty(ParsedSelections)
-    % May mean no color specified
-    ParsedSelections=regexp(textfile,'create (?<seleName>[^,]+), (?<moleName>[^\W]+) and \((?<resi>[^\)]+)\)','names');
-    nocolors=true;
-else
-    nocolors=false;
+textfile=fileread(rv_file);
+ParsedSelections=regexp(textfile,'(?<resNum>[^,]+),(?<helixName>[^\W]+)','names');
+if strcmp(ParsedSelections(1).resNum,'resNum');
+    ParsedSelections(1)=[];
 end
+% if isempty(ParsedSelections)
+%     % May mean no color specified
+%     ParsedSelections=regexp(textfile,'create (?<seleName>[^,]+), (?<moleName>[^\W]+) and \((?<resi>[^\)]+)\)','names');
+%     nocolors=true;
+% else
+%     nocolors=false;
+% end
 
 IndicesA=regexp(Alignment(1).Sequence,'[^-~]');
 IndicesB=regexp(Alignment(2).Sequence,'[^-~]');
 
-[~,corename]=fileparts(pml_file);
+[~,corename]=fileparts(rv_file);
 
-fid=fopen([corename,'_',speciesCodes{2},'.pml'],'wt');
+fid=fopen([corename,'_',speciesCodes{2},'.csv'],'wt');
 %fprintf(fid, '%s,%s,%s,%s,%s,%s,%s,%s,%s\n',RV_Lab_Struct(i).Conservation_Table{1,:});
 
 for i=1:length(ParsedSelections)
-    OriginalResidue=regexp(ParsedSelections(i).resi,'([\d]*)','match');
+    SeleSplits=strsplit(ParsedSelections(i).resNum,';');
     OutputSelections(i)=ParsedSelections(i);
-    OutputResidue=cell(1,length(OriginalResidue));
-    for j=1:length(OriginalResidue)
-        x=strcat(prefix{1},OriginalResidue{j});
+    OutputResidue=cell(1,length(SeleSplits));
+    for j=1:length(SeleSplits)
+%         x=strcat(prefix{1},SeleSplits{j});
+          resplit=strsplit(strtrim(SeleSplits{j}),':')
         [~,I]=ismember(x,ItemListA);
         Pos=IndicesA(I);
         [~,II]=ismember(Pos,IndicesB);
