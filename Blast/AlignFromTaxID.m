@@ -138,7 +138,7 @@ for query_ind=1:numQuerySeqs
     Sequences{query_ind}=Sequences{query_ind}(b);
 end
 Alignment=multialign(vertcat(Sequences{:}));
-multialignviewer(Alignment)
+seqalignviewer(Alignment)
 distances = seqpdist(Alignment,'Method','Jukes-Cantor');
 tree = seqlinkage(distances,'UPGMA',Alignment);
 phytreetool(tree)
