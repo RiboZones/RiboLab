@@ -22,7 +22,7 @@ for i=1:numPDBS
     
     resnums=res_obj(i).ResidueNumber;
     reschains=res_obj(i).ResidueChain;
-    residue_list=cellstr([[reschains{:}]',char(resnums{:})]);
+    residue_list=cellstr([char(reschains),char(resnums)]);
     %%residue_list=res_obj(i).ResidueNumber;
     thermal_list=pa_obj(i).tempFactor;
     

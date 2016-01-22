@@ -130,8 +130,8 @@ classdef Residues < handle
             %             atoms(num_ResiduesU,30)=struct('chemSymbol','','remoteInd','','branch','');
             
             [~,J]=ismember(FAM.UniqueResSeq,Res.ItemNames);
-            atoms=repmat(struct('chemSymbol','','remoteInd','','branch',''),...
-                num_ResiduesU,sum(J==mode(J)));
+            atoms=repmat(struct('wholeAtomName','','chemSymbol','','remoteInd',...
+                '','branch',''),num_ResiduesU,sum(J==mode(J)));
             
             [~,II]=unique(J,'first');
             [~,III]=unique(J,'last');
@@ -390,9 +390,11 @@ end
 function I=isPhosphate(Atoms)
 c=char({Atoms.chemSymbol});
 realatoms=~isspace(c(:,1));
+allowed={'P','OP1','OP2','O1P','O2P'};
 
-I=ismember({Atoms(realatoms).remoteInd},{'P'}) | ismember({Atoms(realatoms).branch},{'P'}) | ...
-    (ismember({Atoms(realatoms).chemSymbol},{'P'}) & ismember({Atoms(realatoms).remoteInd},{''}));
+% I=ismember({Atoms(realatoms).remoteInd},{'P'}) | ismember({Atoms(realatoms).branch},{'P'}) | ...
+%     (ismember({Atoms(realatoms).chemSymbol},{'P'}) & ismember({Atoms(realatoms).remoteInd},{''}));
+I = ismember({Atoms(realatoms).wholeAtomName},allowed);
 end
 
 function I=isSugar(Atoms)

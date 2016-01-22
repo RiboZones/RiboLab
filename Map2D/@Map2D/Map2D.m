@@ -146,16 +146,16 @@ classdef Map2D < handle
         
         function ResidueList = AddMapStructureFile(map_object,file_name,MoleculeChainMap)
             %MapData=importdata(file_name);
-            fid=fopen(file_name,'r','n','UTF-8');
-            MapData=textscan(fid,'%s %s %s %s','delimiter',',');
-            fclose(fid);
-            
-            numDataPoints=size(MapData{1},1)-1;
+%             fid=fopen(file_name,'r','n','UTF-8');
+%             MapData=textscan(fid,'%s %s %s %s','delimiter',',');
+%             fclose(fid);
+            MapData = readtable(file_name);
+            numDataPoints=size(MapData,1);
             map_object.ItemNames=cell(numDataPoints,1);
             map_object.X=zeros(numDataPoints,1);
             map_object.Y=zeros(numDataPoints,1);
             for i=1:numDataPoints
-                mol_name=regexp(MapData{1}{i+1},'([^:]+):','tokens');
+                mol_name=regexp(MapData.resNum{i},'([^:]+):','tokens');
                 if strcmp(mol_name{1}{1},'5.8S')
                     chainID=MoleculeChainMap.(['mol_','5p8S']);
                 elseif (length(mol_name{1}{1})==5 &&  sum(unicode2native(mol_name{1}{1})==[97 82 78 65 26])==5)
@@ -163,12 +163,12 @@ classdef Map2D < handle
                 else
                     chainID=MoleculeChainMap.(['mol_',regexprep(mol_name{1}{1},'-','_')]);
                 end
-                map_object.ItemNames{i}=regexprep(MapData{1}{i+1},'([^:]+):',[chainID,'_']);
-                map_object.X(i)=str2double(MapData{3}{i+1});
-                map_object.Y(i)=str2double(MapData{4}{i+1});
-                map_object.Other(i,1).Letter=MapData{2}{i+1};
+                map_object.ItemNames{i}=regexprep(MapData.resNum{i},'([^:]+):',[chainID,'_']);
+                map_object.X(i)=str2doubleq(MapData.X(i));
+                map_object.Y(i)=str2doubleq(MapData.Y(i));
+                map_object.Other(i,1).Letter=MapData.unModResName{i};
             end
-            ResidueList = MapData{1}(2:end);
+            ResidueList = MapData.resNum;
         end
         
         function Transform(map_object,varargin)

@@ -28,15 +28,22 @@ classdef Chain < handle
         % *Instantiation function*
         function chain = Chain(ID,NameOfChain)                             % This creates a new instance of Chain
             chain.ID=ID;                                                   % Assign The model ID code
-            chain.Name=NameOfChain;                                        % Assign the name of the chain inside the model
+            x=sprintf('%s_',NameOfChain{:});
+            chain.Name=x(1:end-1);                                        % Assign the name of the chain inside the model
         end
         
         %%
         % *Groups atoms into their respective residues*
-        function chain=CreateChain(chain,FAM,NameOfChain)
-            str_chainIDs=[FAM.Model.chainID];                              % Since Chain names are always one character, this should work
-            %indices=strfind(str_chainIDs,NameOfChain);                     % Find the indices of the atoms in the chain of interest                                      
-            indices=regexp(upper(str_chainIDs),['[',NameOfChain,']']);
+        function chain=CreateChain(chain,FAM,NameOfChains)
+            %No longer single character chains. 
+%             str_chainIDs=[FAM.Model.chainID];                              % Since Chain names are always one character, this should work
+            %indices=strfind(str_chainIDs,NameOfChain);                     % Find the indices of the atoms in the chain of interest    
+             %indices=regexp(upper(str_chainIDs),['[',NameOfChain,']']);
+            
+            %New multicharacter chains. May need optimization
+            str_chainIDs=vertcat(FAM.Model.chainID);   
+            indices=ismember(str_chainIDs,NameOfChains);                       
+           
             fam_subset=FullAtomModel();                                    % Since, Residues operates directly on FullAtomModel, a new object is 
             fam_subset.CutFAM(indices,FAM);                                % needed containing only the chain of choice.
             chain.residues=Residues(strcat(chain.ID,'_',chain.Name));      % Creates a Residues object of name CHAINID_CHAINNAME 

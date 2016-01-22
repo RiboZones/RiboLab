@@ -213,7 +213,7 @@ if ~isempty(result)
 else
     file='.\';
 end
-[FileName,PathName] = uigetfile({'*.pdb';'*.*'},'Select the PDB File (or two)',file,...
+[FileName,PathName] = uigetfile({'*.cif';'*.pdb';'*.*'},'Select the mmCIF or pdb files',file,...
     'MultiSelect','on');
 if ~isequal(FileName,0) && ~isequal(PathName,0)
     %set(handles.FilesProcessedText,'Visible','off')
@@ -287,7 +287,7 @@ if ~isequal(FileName,0) && ~isequal(PathName,0)
     CadsTable=cell(numCads,3);
     for i =1:numCads
         CadsTable{i,1}=RiboLabCads(i).Name;
-        x=regexp(RiboLabCads(i).Name,'RIBOSOMAL PROTEIN ([\w][^\s:]+)','tokens');
+        x=regexpi(RiboLabCads(i).Name,'RIBOSOMAL PROTEIN ([\w][^\s:]+)','tokens');
         if isempty(x)
             x=regexp(RiboLabCads(i).Name,'([\d\.]+S)','tokens');
             if isempty(x)
@@ -302,7 +302,7 @@ if ~isequal(FileName,0) && ~isequal(PathName,0)
             CadsTable(i,3)=regexprep(x{1},'-','');
             CadsTable{i,2}='rProtein';
         end
-        y=regexp(RiboLabCads(i).Name,':\sChain\(s\)\s([\w\d])','tokens');
+        y=regexp(RiboLabCads(i).Name,':\sChain\(s\)\s([\w\d]+)','tokens');
         CadsTable(i,4)=y{1};
     end
     set(handles.MoleculeNamesTable,'Data',CadsTable);
@@ -384,7 +384,7 @@ if get(handles.meanBFactBox,'value')
         repmat({RiboLabMap.ItemNames},1,length(RiboLabCads_rRNA)));
     numDataPoints=size(Thermal_Factor_Table,1);
     for j = 1: numDataPoints
-        chainID=regexp(Thermal_Factor_Table{j,1},'([^_])_','tokens');
+        chainID=regexp(Thermal_Factor_Table{j,1},'([^_]+)_','tokens');
         Thermal_Factor_Table{j,1}=regexprep(Thermal_Factor_Table{j,1},'([^_]+)_',[ChainMoleculeMap.(['chain_',chainID{1}{1}]),':']);
         if isempty(Thermal_Factor_Table{j,2})
             Thermal_Factor_Table{j,2}='';
@@ -500,9 +500,9 @@ if get(handles.ProteinContactsBox,'value') || get(handles.MagContactsBox,'value'
     
     rvfam=FullAtomModel();
     rvfam.PopulateFAM(NewTarget.PDB.PDB);
-    chain=unique([NewTarget.PDB.PDB.Model.Atom.chainID]);
-    x=Chain('',chain);
-    x.CreateChain(rvfam,chain);
+    chains=unique(cellstr(vertcat(NewTarget.PDB.PDB.Model.Atom.chainID)));
+    x=Chain('',chains);
+    x.CreateChain(rvfam,chains);
     RVResidues=x.residues;
     [RVResidues,RealAtomsNames_B]=AtomFilter(RVResidues,'rna');
     

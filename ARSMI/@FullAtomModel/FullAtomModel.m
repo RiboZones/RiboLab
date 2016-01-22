@@ -67,7 +67,7 @@ classdef FullAtomModel < handle
         
         function renumberRes(FAM)
             resnum=cellstr(num2str([FAM.Model.resSeq]'));
-            reschain=cellstr([FAM.Model.chainID]');
+            reschain=cellstr(vertcat(FAM.Model.chainID));
 %             resiCode=cell(length(FAM.Model),1);
 %             for i=1:length(FAM.Model)
 %                 if isempty(FAM.Model(i).iCode)

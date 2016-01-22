@@ -898,7 +898,7 @@ classdef Onion < handle
                         resobjs=[onion_obj(i).Model.Layers{:}];
                         resnums=vertcat(resobjs.ResidueNumber);
                         reschains=vertcat(resobjs.ResidueChain);
-                        R=cellstr([[reschains{:}]',char(resnums{:})]);
+                        R=cellstr([char(reschains),char(resnums)]);
                         
                         
                         [inMap,I]=ismember(R,regexprep(ItemNames,'_',''));
@@ -943,7 +943,18 @@ classdef Onion < handle
                 if isempty(PreFix)
                     %Onion_Table(:,1)=ItemNames';
                 else
-                    xx=ItemNames{III(1)};%% assume one chain per onion, true right now, assume one letter per chain, also true.
+                    if isempty(III)
+                        %Unless something went wrong, this would happen if
+                        %there were additional residues in the 3D structure
+                        %that are not defined in the structure file. In
+                        %other words, this happens when trying to process
+                        %the subunit that isn't in the secondary structure.
+                        %This program does one subunit at a time right now,
+                        %but now we include whole structure cif files.
+                        continue
+                    end
+                    xx=ItemNames{III(1)};%% assume one chain per onion, true right now. %one letter per chain is no longer true.
+                     
                     %Onion_Table(III,1)=regexprep(ItemNames(III),[xx(1),'_'],PreFix{i})';
                     Onion_Table(III,1)=regexprep(ItemNames(III),['^',xx(1),'(_)*'],PreFix{i})';
                 end

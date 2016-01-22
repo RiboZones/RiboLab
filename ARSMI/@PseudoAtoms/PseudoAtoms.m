@@ -107,6 +107,8 @@ num_atomres=length(Names_Atoms);
 mass=zeros(num_atomres,3);
 for j=1:num_atomres
     switch Names_Atoms{j}
+        case 'H'
+            mass(j,:)=1*ones(1,3);
         case 'C'
             mass(j,:)=12*ones(1,3);
         case 'N'

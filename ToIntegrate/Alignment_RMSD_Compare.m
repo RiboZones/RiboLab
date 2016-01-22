@@ -24,7 +24,7 @@ UpdateAlignments(RV_Lab_Struct1,OriginalAlignment);
 UpdateAlignments(RV_Lab_Struct2,OriginalAlignment);
 
 % Plot results
-hold on;plot(RMSD_Orig.x,RMSD_Orig.RMSD,'g');plot(RMSD_Second.x,RMSD_Second.RMSD,'k-');hold off;
+hold on;plot(RMSD_Orig.x.renumber,RMSD_Orig.RMSD.renumber,'g');plot(RMSD_Second.x.renumber,RMSD_Second.RMSD.renumber,'k-');hold off;
 
 RMSD_Struct=[RMSD_Orig,RMSD_Second];
 end

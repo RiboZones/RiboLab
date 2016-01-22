@@ -6,6 +6,7 @@ classdef PDBentry < handle
         Name
         ID
         PDB
+        CIF
         UniqueResSeq
         AtomSerNo
         UniqueAtomNames
@@ -25,9 +26,9 @@ classdef PDBentry < handle
         function ImportPDB(pdb_obj,select)
             switch select
                 case 'gui'
-                    [FileName,PathName] = uigetfile({'*.pdb';'*.*'},...
-                        'Select the PDF File','MultiSelect', 'off');
-                    if isequal(FileName,0) || isequal(PathName,0)
+                    [fileName,pathName] = uigetfile({'*.pdb';'*.cif';'*.*'},...
+                        'Select the 3D Structure File','MultiSelect', 'off');
+                    if isequal(fileName,0) || isequal(pathName,0)
                         skip=true;
                     else
                         skip=false;
@@ -35,31 +36,28 @@ classdef PDBentry < handle
                     gui=true;
                 otherwise
                     skip=false;
-                    file=select;
                     gui=false;
-                    if ispc()
-                        slash=strfind(file,'\');
-                    else
-                        slash=strfind(file,'/');
-                    end
-                    if ~isempty(slash)
-                        PathName=file(1:slash(end));
-                        FileName=file(slash(end)+1:end);
-                    else
-                        PathName=[];
-                        FileName=file;
-                    end
+                    [pathName,fileName,ext]=fileparts(select);
             end
             if ~skip
                 if gui
                     h=PleaseWait();
                 end
-                newID=[PathName,FileName(1:end-4)];
-                file=strcat(PathName,FileName);
+                newID=fullfile(pathName,fileName);
+                file=fullfile(pathName,[fileName ext]);
                 if exist([newID,'.mat'],'file') == 2
                     load([newID,'.mat'])
                 else
-                    pdb=importdata(file);
+                    switch ext
+                        case '.pdb'
+                            pdb=pdbread(file);
+                            
+                        case '.cif'
+                            cif_obj=cif(file);
+                            pdb_obj.CIF=cif_obj.cifdat;
+                            pdb=cif2pdb(pdb_obj,cif_obj);
+                            
+                    end
                     save([newID,'.mat'],'pdb','-v7')
                 end
                 if isfield(pdb.Model,'AnisotropicTemp')
@@ -76,6 +74,62 @@ classdef PDBentry < handle
             
         end
         
+        function pdb=cif2pdb(pdb_obj,cif_obj)
+            cifdat=cif_obj.cifdat;
+            
+            pdb=[];
+            
+            %HEADER
+            %pdb.Header
+            %Title
+            %Compound
+            %Source
+            %ExperimentData
+            %Authors
+            %RevisionDate: [1x2 struct]
+            %Journal: [1x1 struct]
+            %Remark2: [1x1 struct]
+            %Remark3: [1x1 struct]
+            %Remark4: [2x59 char]
+            %Remark100: [3x59 char]
+            %Remark200: [49x59 char]
+            %Remark280: [9x59 char]
+            %Remark290: [48x59 char]
+            %Remark300: [6x59 char]
+            %Remark350: [32x59 char]
+            %Remark375: [8x59 char]
+            %Remark465: [50x59 char]
+            %Remark500: [55x59 char]
+            %Remark620: [11x59 char]
+            %Remark800: [13x59 char]
+            %Remark999: [9x59 char]
+            %DBReferences: [1x3 struct]
+            %SequenceConflicts: [1x1 struct]
+            %Sequence: [1x3 struct]
+            %ModifiedResidues: [1x4 struct]
+            %Heterogen: [1x7 struct]
+            %HeterogenName: [1x2 struct]
+            %Formula: [1x3 struct]
+            %Helix: [1x6 struct]
+            %Sheet: [1x15 struct]
+            %Link: [1x12 struct]
+            %Site: [1x1 struct]
+            %Cryst1: [1x1 struct]
+            %OriginX: [1x3 struct]
+            %Scale: [1x3 struct]
+            %Model:
+            pdb.Model = cif_model(cif_obj);
+            pdb.Compound = cif_compound(cif_obj);
+
+            
+           
+            
+            %Connectivity: [1x46 struct]
+            %Master: [1x1 struct]
+            %SearchURL: 'http://www.rcsb.org/pdb/downloadFile.do?fileFormat=pdb&compression=NO&structureId=3iab'
+            
+        end
+        
         function PDBfromStruct(pdb_obj,pdb,newID)
             if nargin < 3
                 newID='none';
@@ -87,7 +141,8 @@ classdef PDBentry < handle
         
         function Process(pdb_obj,het)
             if nargin == 1 || het
-                if isfield(pdb_obj.PDB.Model,'HeterogenAtom')                           % If HeterogenAtoms are found in the pdb structure, include them
+                if isfield(pdb_obj.PDB.Model,'HeterogenAtom') && length(pdb_obj.PDB.Model.HeterogenAtom) && ~isempty(pdb_obj.PDB.Model.HeterogenAtom(1).AtomSerNo)                 
+                    % If HeterogenAtoms are found in the pdb structure, include them
                     pdb_obj.PDB.Model.Atom=[pdb_obj.PDB.Model.Atom pdb_obj.PDB.Model.HeterogenAtom];
                     pdb_obj.PDB.Model=rmfield(pdb_obj.PDB.Model,'HeterogenAtom');
                 else
@@ -95,7 +150,7 @@ classdef PDBentry < handle
             end
             resnum=cellstr(num2str([pdb_obj.PDB.Model.Atom.resSeq]'));
             try
-                reschain=cellstr([pdb_obj.PDB.Model.Atom.chainID]');
+                reschain=cellstr(vertcat(pdb_obj.PDB.Model.Atom.chainID));
             catch
                 reschain={''};
             end
