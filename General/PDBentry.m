@@ -83,7 +83,9 @@ classdef PDBentry < handle
             %pdb.Header
             %Title
             %Compound
+            pdb.Compound = cif_compound(cif_obj);
             %Source
+            pdb.Source = cif_source(cif_obj);
             %ExperimentData
             %Authors
             %RevisionDate: [1x2 struct]
@@ -119,8 +121,7 @@ classdef PDBentry < handle
             %Scale: [1x3 struct]
             %Model:
             pdb.Model = cif_model(cif_obj);
-            pdb.Compound = cif_compound(cif_obj);
-
+           
             
            
             

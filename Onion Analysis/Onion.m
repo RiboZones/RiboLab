@@ -954,9 +954,9 @@ classdef Onion < handle
                         continue
                     end
                     xx=ItemNames{III(1)};%% assume one chain per onion, true right now. %one letter per chain is no longer true.
-                     
+                    u=strfind(xx,'_');
                     %Onion_Table(III,1)=regexprep(ItemNames(III),[xx(1),'_'],PreFix{i})';
-                    Onion_Table(III,1)=regexprep(ItemNames(III),['^',xx(1),'(_)*'],PreFix{i})';
+                    Onion_Table(III,1)=regexprep(ItemNames(III),['^',xx(1:u-1),'(_)*'],PreFix{i})';
                 end
                 Onion_Table(III,2)=num2cell(s(II))';
             end

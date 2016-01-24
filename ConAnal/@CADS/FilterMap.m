@@ -69,11 +69,11 @@ for Pro_ind=1:numDataSets
         subsetsmode=false;
         numSubsets=1;
     end
-    names=CADS_object(Pro_ind).Species;
+%     names=CADS_object(Pro_ind).Species;
     %     CAOut(length(names))=ConAnalOutput();
     %     MapUC=cell(1,length(names));
     
-    for model=1:length(names)
+    for model=1:length(CADS_object(Pro_ind).PDB)
         %         pdb1 = PDBentry([names{model},'Subject']);
         %         pdb2 = PDBentry([names{model},'Target']);
         %         pdb1.PDBfromStruct(CADS_object(Pro_ind).PDB(model),'newID1')

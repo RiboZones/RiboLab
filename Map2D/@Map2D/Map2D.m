@@ -164,8 +164,8 @@ classdef Map2D < handle
                     chainID=MoleculeChainMap.(['mol_',regexprep(mol_name{1}{1},'-','_')]);
                 end
                 map_object.ItemNames{i}=regexprep(MapData.resNum{i},'([^:]+):',[chainID,'_']);
-                map_object.X(i)=str2doubleq(MapData.X(i));
-                map_object.Y(i)=str2doubleq(MapData.Y(i));
+                map_object.X(i)=MapData.X(i);
+                map_object.Y(i)=MapData.Y(i);
                 map_object.Other(i,1).Letter=MapData.unModResName{i};
             end
             ResidueList = MapData.resNum;
@@ -286,19 +286,19 @@ classdef Map2D < handle
             
             Table=cell(numResi,7);
             Table(:,1)=num2cell(1:numResi);
-            Table(:,2)=vertcat(regexprep(myMap.ItemNames,'[\w\d]_',''));
+            Table(:,2)=vertcat(regexprep(myMap.ItemNames,'[\w\d]+_',''));
             if isfield(myMap.Other,'Letter')
                 Table(:,3)={myMap.Other.Letter}';
             else
                 Table(:,3)={myMap.Other.LabelText}';
             end
             Table(:,4)=vertcat(regexprep(myMap.ItemNames,'_[\w\d]+',''));
-            d=regexp(unique(UniqueResSeq),'(.)_[\s]*([\w]+)','tokens');
+            d=regexp(unique(UniqueResSeq),'(.+)_[\s]*([\w]+)','tokens');
             d=[d{:}];
             residue_Chain_list=vertcat(d{:});
             residue_list=residue_Chain_list(:,2);
             xtalindex=1:length(residue_list);
-            if strcmp(myMap.ItemNames{end}(2),'_')
+            if strfind(myMap.ItemNames{end},'_')>0
                 residue_list=strcat(residue_Chain_list(:,1),'_',...
                     residue_Chain_list(:,2));
             end

@@ -392,7 +392,7 @@ if get(handles.meanBFactBox,'value')
              Thermal_Factor_Table{j,2}=num2str(Thermal_Factor_Table{j,2});
         end
     end
-    result.Thermal_Factor_Table=Thermal_Factor_Table;
+     result.Thermal_Factor_Table=Thermal_Factor_Table;
 end
 
 if get(handles.fineOnionBox,'value') || get(handles.coarseOnionBox,'value')
@@ -568,7 +568,7 @@ RiboLabCads_rRNA= result.RiboLabCads_rRNA;
 R=[RiboLabCads_rRNA.PDB];
 Table = RiboLabMap.BasicTable(vertcat(R.UniqueResSeq));
 TableHeader={'map_Index','resNum','resName','ChainID','X','Y','Xtal_Index';'int',...
-    'varchar(6)','varchar(3)','char(1)','real(8,3)','real(8,3)','int'};
+    'varchar(7)','varchar(3)','char(2)','real(8,3)','real(8,3)','int'};
 
 
 if get(handles.DomainDefbox,'value')
@@ -612,36 +612,52 @@ if get(handles.MagContactsBox,'value')
 end
 
 [DataSetName_path]=fileparts(result.File);
-xlswrite([DataSetName_path,'\',get(handles.DataSetName,'String'),'.xlsx'],vertcat(TableHeader,Table));
+writetable(cell2table(Table,'VariableNames',TableHeader(1,:)), [DataSetName_path,...
+    '\',get(handles.DataSetName,'String'),'.csv'] );
+
+% xlswrite([DataSetName_path,'\',get(handles.DataSetName,'String'),'.xlsx'],vertcat(TableHeader,Table));
 if get(handles.ProteinInteractionBox,'value')
     NPN=[{'pairIndex','resIndex1','resIndex2','bp_type','ProteinName'};
      {'int','int','int','varchar(6)','varchar(6)'};
         result.Protein_Interaction_Table];
-    xlswrite([DataSetName_path,'\',get(handles.DataSetName,'String'),'_NPN','.xlsx'],NPN);
+    writetable(cell2table(result.Protein_Interaction_Table,'VariableNames',NPN(1,:)), [DataSetName_path,...
+    '\',get(handles.DataSetName,'String'),'_NPN','.csv'] );
+%     xlswrite([DataSetName_path,'\',get(handles.DataSetName,'String'),'_NPN','.xlsx'],NPN);
     
 end
 if get(handles.MagInteractionBox,'value')
     NMN=[{'pairIndex','resIndex1','resIndex2','bp_type'};
      {'int','int','int','varchar(6)'};
         result.Magnesium_Interaction_Table(:,1:4)];
-    xlswrite([DataSetName_path,'\',get(handles.DataSetName,'String'),'_NMN','.xlsx'],NMN);
+    writetable(cell2table(result.Magnesium_Interaction_Table(:,1:4),'VariableNames',NMN(1,:)), [DataSetName_path,...
+    '\',get(handles.DataSetName,'String'),'_NMN','.csv'] );
+%     xlswrite([DataSetName_path,'\',get(handles.DataSetName,'String'),'_NMN','.xlsx'],NMN);
     
 end
 if get(handles.FR3D_InteractionsBox,'value')
     Names={'BasePairs','Stacking','BaseSugar','BasePhosphate'};
     for i=1:length(Names)
-        xlswrite([DataSetName_path,'\',get(handles.DataSetName,'String'),'_',Names{i},'.xlsx'],...
-            result.FR3D_Interaction_Tables{i}(:,1:4));
+        writetable(cell2table(result.FR3D_Interaction_Tables{i}(3:end,1:4),...
+            'VariableNames',result.FR3D_Interaction_Tables{i}(1,1:4)), [DataSetName_path,...
+        '\',get(handles.DataSetName,'String'),'_',Names{i},'.csv'] );
+        %         xlswrite([DataSetName_path,'\',get(handles.DataSetName,'String'),'_',Names{i},'.xlsx'],...
     end
 end
 if get(handles.ProteinOnionBox,'value')
-    xlswrite([DataSetName_path,'\',get(handles.DataSetName,'String'),'_ProteinOnions','.xlsx'],...
-        [{'resNum','DataCol'};result.Protein_Onion_Table]);
+     writetable(cell2table(result.Protein_Onion_Table,...
+            'VariableNames',{'resNum','DataCol'}), [DataSetName_path,...
+        '\',get(handles.DataSetName,'String'),'_ProteinOnions','.csv'] );
+    
+%     xlswrite([DataSetName_path,'\',get(handles.DataSetName,'String'),'_ProteinOnions','.xlsx'],...
+%         [{'resNum','DataCol'};result.Protein_Onion_Table]);
 end
 if get(handles.EntropyBox,'value')
-    xlswrite([DataSetName_path,'\',get(handles.DataSetName,'String'),'_ConservationTable','.xlsx'],...
-        [result.Conservation_Table(1,:);{'varchar(11)','varchar(3)','char(1)',...
-        'real(5,4)','real(5,4)','real(5,4)','real(5,4)','real(5,4)','real(5,4)'};result.Conservation_Table(2:end,:)]);
+    writetable(cell2table(result.Conservation_Table(2:end,:),...
+        'VariableNames',result.Conservation_Table(1,:)), [DataSetName_path,...
+        '\',get(handles.DataSetName,'String'),'_ConservationTable','.csv'] );
+    %     xlswrite([DataSetName_path,'\',get(handles.DataSetName,'String'),'_ConservationTable','.xlsx'],...
+%         [result.Conservation_Table(1,:);{'varchar(11)','varchar(3)','char(1)',...
+%         'real(5,4)','real(5,4)','real(5,4)','real(5,4)','real(5,4)','real(5,4)'};result.Conservation_Table(2:end,:)]);
 end
 % --- Executes on button press in DomainDefbox.
 function DomainDefbox_Callback(hObject, eventdata, handles)

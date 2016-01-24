@@ -36,7 +36,9 @@ if bp_reverse
 end
 
 for numSet = 1: numObjs
-    
+    if isempty(CADS_object(numSet).Results(Species_ind).FilteredMap)
+        continue
+    end
     numSamples=length(CADS_object(numSet).Results(Species_ind).FilteredMap(1).contacts);
     DataStruct=struct('Index',repmat({''},numSamples,1),'BP1_Name',...
         repmat({''},numSamples,1),'BP1_Num',repmat({''},numSamples,1),'BP1_Chain',...
@@ -96,7 +98,7 @@ for numSet = 1: numObjs
                 
         end
     end
-    numKeep=length([BP(numSet).Data.BP1_Chain]);
+    numKeep=length(vertcat(BP(numSet).Data.BP1_Chain));
     BP(numSet).Data=BP(numSet).Data(1:numKeep);
 end
 % if emptyData

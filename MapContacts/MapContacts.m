@@ -106,7 +106,7 @@ if ~SkipResidues
 end
 
 if nargin > 4 && ~isempty(IncludeRes)
-    [~,subset]=ismember(IncludeRes,regexprep(Data.RES.(Name1).ItemNames,'[\d\w]_\s*',''));
+    [~,subset]=ismember(IncludeRes,regexprep(Data.RES.(Name1).ItemNames,'[\d\w]+_\s*',''));
     subset=subset(subset>0);
     SubsetRes1=Residues([Data.PDB.(Name1).ID, '_cut']);
     SubsetRes1.CutRes(subset,Data.RES.(Name1));

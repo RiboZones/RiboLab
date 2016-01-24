@@ -136,14 +136,15 @@ classdef Residues < handle
             [~,II]=unique(J,'first');
             [~,III]=unique(J,'last');
             R=[dataX,dataY,dataZ];
-            
             for index=1:num_ResiduesU
     
                 %% New way
                 indices=II(index):III(index);
                 atoms(index,1:length(indices))=AtNaStr(indices);
                 r{index}=R(indices,:);
-                resnum{index}=Res.ItemNames{index}(3:end);
+                u=strfind(Res.ItemNames{index},'_');
+
+                resnum{index}=Res.ItemNames{index}(u+1:end);
                 resSeqU{index}=FAM.UniqueResSeq(indices)';
                 tempFactors{index}=[FAM.Model(indices).tempFactor]';
                 %% old way

@@ -1,4 +1,4 @@
-function [ output_args ] = RiboVision_Species_Convert( rv_file, prefix, speciesCodes, newMoleculeName, Alignment, ItemListA, ItemListB )
+function [ output_args ] = RiboVision_Species_Convert( rv_file, speciesCodes, Alignment, ItemListA, ItemListB )
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -21,48 +21,66 @@ IndicesB=regexp(Alignment(2).Sequence,'[^-~]');
 [~,corename]=fileparts(rv_file);
 
 fid=fopen([corename,'_',speciesCodes{2},'.csv'],'wt');
-%fprintf(fid, '%s,%s,%s,%s,%s,%s,%s,%s,%s\n',RV_Lab_Struct(i).Conservation_Table{1,:});
+fprintf(fid, 'resNum,HelixName\n');
+
+OutputSelections=cell(1,length(ParsedSelections));
 
 for i=1:length(ParsedSelections)
     SeleSplits=strsplit(ParsedSelections(i).resNum,';');
-    OutputSelections(i)=ParsedSelections(i);
-    OutputResidue=cell(1,length(SeleSplits));
+    OutputResidue=cell(2,length(SeleSplits));
     for j=1:length(SeleSplits)
-%         x=strcat(prefix{1},SeleSplits{j});
-          resplit=strsplit(strtrim(SeleSplits{j}),':')
-        [~,I]=ismember(x,ItemListA);
-        Pos=IndicesA(I);
-        [~,II]=ismember(Pos,IndicesB);
-        if II <=0
-            % If do not find an exact match, just take the previous
-            % nucleotide
-            PrevNuc=find(IndicesB<Pos, 1, 'last' );
-            OutputResidue{j}=regexprep(ItemListB(PrevNuc),prefix{2},'');
-            %OutputResidue{j}='x';
-        else
-            OutputResidue{j}=regexprep(ItemListB(II),prefix{2},'');
+        %         x=strcat(prefix{1},SeleSplits{j});
+        resplit=strsplit(strtrim(SeleSplits{j}),':');
+        numsplit=regexp(resplit{2},'[\w\d]+','match');
+        for k=1:2
+            [~,I]=ismember([resplit{1},':',numsplit{k}],ItemListA);
+            if I > 0
+                Pos=IndicesA(I);
+                [~,II]=ismember(Pos,IndicesB);
+                if II <=0 && k == 1
+                    % If do not find an exact match, just take the next
+                    % nucleotide
+                    NextNuc=find(IndicesB>Pos, 1, 'first' );
+                    OutputResidue(k,j)=ItemListB(NextNuc);
+                    %OutputResidue{j}='x';
+                elseif II<=0 && k == 2
+                    % If do not find an exact match, just take the previous
+                    % nucleotide
+                    PrevNuc=find(IndicesB<Pos, 1, 'last' );
+                    OutputResidue(k,j)=ItemListB(PrevNuc);
+                    %OutputResidue{j}='x';
+                else
+                    OutputResidue(k,j)=ItemListB(II);
+                end
+            end
         end
-        OutputSelections(i).resi=regexprep(OutputSelections(i).resi,OriginalResidue{j},OutputResidue{j});
-        if nocolors
-            ParsedSelections(i).color='red';
-            OutputSelections(i).color='blue';
+        if I == 0
+            continue
+        end
+        x=strsplit(OutputResidue{1,j},':');
+        y=strsplit(OutputResidue{2,j},':');
+        
+        if j == 1
+            OutputSelections{i}=[x{1},':(',x{2},'-',y{2},')'];
+        else
+            OutputSelections{i}=[OutputSelections{i},';',x{1},':(',x{2},'-',y{2},')'];
         end
     end
-    OutputSelections(i).moleName=newMoleculeName;
-    OutputSelections(i).seleName=regexprep(OutputSelections(i).seleName,speciesCodes{1},speciesCodes{2});
+    %     OutputSelections(i).moleName=newMoleculeName;
+    %     OutputSelections(i).seleName=regexprep(OutputSelections(i).seleName,speciesCodes{1},speciesCodes{2});
     %OutputSelections(i).color=['n_',OutputSelections(i).color];
     
-    %Print original in new file
-    fprintf(fid,'create %s, %s and (%s)\n',ParsedSelections(i).seleName,ParsedSelections(i).moleName,ParsedSelections(i).resi);
-    fprintf(fid,'color %s, %s\n',ParsedSelections(i).color,ParsedSelections(i).seleName);
-    fprintf(fid,'show cartoon, %s\n',ParsedSelections(i).seleName);
-    fprintf(fid,'#show surface, %s\n\n\n',ParsedSelections(i).seleName);
+    %     %Print original in new file
+    %     fprintf(fid,'create %s, %s and (%s)\n',ParsedSelections(i).seleName,ParsedSelections(i).moleName,ParsedSelections(i).resi);
+    %     fprintf(fid,'color %s, %s\n',ParsedSelections(i).color,ParsedSelections(i).seleName);
+    %     fprintf(fid,'show cartoon, %s\n',ParsedSelections(i).seleName);
+    %     fprintf(fid,'#show surface, %s\n\n\n',ParsedSelections(i).seleName);
     
     %Print converted in new file
-    fprintf(fid,'create %s, %s and (%s)\n',OutputSelections(i).seleName,OutputSelections(i).moleName,OutputSelections(i).resi);
-    fprintf(fid,'color %s, %s\n',OutputSelections(i).color,OutputSelections(i).seleName);
-    fprintf(fid,'show cartoon, %s\n',OutputSelections(i).seleName);
-    fprintf(fid,'#show surface, %s\n\n\n',OutputSelections(i).seleName);
+    fprintf(fid,'%s,%s\n',OutputSelections{i},ParsedSelections(i).helixName);
+    %     fprintf(fid,'color %s, %s\n',OutputSelections(i).color,OutputSelections(i).seleName);
+    %     fprintf(fid,'show cartoon, %s\n',OutputSelections(i).seleName);
+    %     fprintf(fid,'#show surface, %s\n\n\n',OutputSelections(i).seleName);
     
 end
 
