@@ -10,6 +10,7 @@ classdef Map2D < handle
         Other
         TextLabels
         LineLabels
+        FontSize
     end
     
     methods
@@ -154,6 +155,7 @@ classdef Map2D < handle
             map_object.ItemNames=cell(numDataPoints,1);
             map_object.X=zeros(numDataPoints,1);
             map_object.Y=zeros(numDataPoints,1);
+            map_object.FontSize=MapData.FontSize(1);
             for i=1:numDataPoints
                 mol_name=regexp(MapData.resNum{i},'([^:]+):','tokens');
                 if strcmp(mol_name{1}{1},'5.8S')

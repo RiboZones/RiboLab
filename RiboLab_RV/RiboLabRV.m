@@ -216,8 +216,6 @@ end
 [FileName,PathName] = uigetfile({'*.cif';'*.pdb';'*.*'},'Select the mmCIF or pdb files',file,...
     'MultiSelect','on');
 if ~isequal(FileName,0) && ~isequal(PathName,0)
-    %set(handles.FilesProcessedText,'Visible','off')
-    %set(handles.FilesLoadedText,'Visible','off')
     h=PleaseWait();
     if iscell(FileName)
         numFiles=length(FileName);
@@ -227,64 +225,32 @@ if ~isequal(FileName,0) && ~isequal(PathName,0)
     end
     RiboLabCads=[];
     RiboLabPDBs=[];
-    DataSetName='';
-    FullFileList='';
+    
     for i=1:numFiles
         file=fullfile(PathName,FileName{i});
-        [~,DataSetName_piece]=fileparts(file);
-        DataSetName = [DataSetName,DataSetName_piece,'_'];
-        FullFileList = [FullFileList,DataSetName_piece,', '];
         [a,b]=CadsSet(file);
         RiboLabCads = [RiboLabCads,a];
         RiboLabPDBs = [RiboLabPDBs,b];
     end
-    DataSetName(end)=[];
-    FullFileList(end-1:end)=[];
-    
-    %RiboLabCads = CADS(name);
-    %%RiboLabCads.AddPDB({file});
- 
-    
-    %     textfile=fileread(file);
-    %
-    %     IDlist=regexp(textfile,'[\w]+','match');
-    %     numIDs=length(IDlist);
-    %     Structures(numIDs,1)=PDBentry();
-    %     %     h=PleaseWait();
-    %     numFiles=length(IDlist);
-    %     set(handles.FilesLoadedText,'String',sprintf('%d out of %d files loaded.',0,numFiles))
-    %     set(handles.FilesLoadedText,'Visible','on')
-    %     drawnow()
-    %
-    %     for i=1:numFiles
-    %         ID=fullfile(path,IDlist{i});
-    %         if exist([ID,'.mat'],'file') == 2
-    %             load([ID,'.mat'])
-    %         elseif exist([ID,'.pdb'],'file') == 2
-    %             pdb=importdata([ID,'.pdb']);
-    %             save([ID,'.mat'],'pdb')
-    %         else
-    %             pdb = getpdb(IDlist{i}, 'ToFile', [ID,'.pdb']);
-    %             save([ID,'.mat'],'pdb')
-    %         end
-    %         Structures(i)=PDBentry(pdb.Title);
-    %         Structures(i).PDBfromStruct(pdb,IDlist{i})
-    %         %Structures(i).Process()
-    %         set(handles.FilesLoadedText,'String',sprintf('%d out of %d files loaded.',i,numFiles))
-    %         drawnow()
-    %     end
-    
+%     FullFileList='';
+%     [~,DataSetName_piece]=fileparts(file);
+%     FullFileList = [FullFileList,DataSetName_piece,', '];
+%     DataSetName='';
+%     DataSetName = [DataSetName,DataSetName_piece,'_'];
+%     DataSetName(end)=[];
+%     FullFileList(end-1:end)=[];
+
     result.RiboLabCads=RiboLabCads;
     result.RiboLabPDBs=RiboLabPDBs;
 
     result.File=file;
-    %     result.IDlist=IDlist;
     
-    set(handles.DataSetName,'String',DataSetName);
+   
     set(handles.output,'UserData',result);
-    set(hObject,'String',FullFileList);
+   
     numCads=length(RiboLabCads);
     CadsTable=cell(numCads,3);
+    subunit='';
     for i =1:numCads
         CadsTable{i,1}=RiboLabCads(i).Name;
         x=regexpi(RiboLabCads(i).Name,'RIBOSOMAL PROTEIN ([\w][^\s:]+)','tokens');
@@ -299,7 +265,17 @@ if ~isequal(FileName,0) && ~isequal(PathName,0)
                 CadsTable{i,2}='rRNA';
             end
         else
-            CadsTable(i,3)=regexprep(x{1},'-','');
+            %CadsTable(i,3)=regexprep(x{1},'-','');
+            %Sanitize names to be valid field names. Remove later maybe. 
+            t=regexprep(x{1},'[^\w]+','_');
+            CadsTable(i,3)=regexprep(t,'^(\d)','z$1');
+
+            %Guess subunit based on first rProtein. 
+            if isempty(subunit) && strcmp(x{1}{1}(1),'L')
+                subunit='LSU';
+            elseif isempty(subunit) && strcmp(x{1}{1}(1),'S')
+                subunit='SSU';
+            end
             CadsTable{i,2}='rProtein';
         end
         y=regexp(RiboLabCads(i).Name,':\sChain\(s\)\s([\w\d]+)','tokens');
@@ -307,20 +283,13 @@ if ~isequal(FileName,0) && ~isequal(PathName,0)
     end
     set(handles.MoleculeNamesTable,'Data',CadsTable);
     set(handles.customAtomN,'enable','on');
+      
+    %Guess species abreviation (four letters)
+    sn=regexp(RiboLabCads(1).Species{1},'([\w][\w])[^\s]*\s([\w][\w])[\w]*','tokens');
+    sn=[upper(sn{1}{1}(1)),lower(sn{1}{1}(2)),upper(sn{1}{2}(1)),lower(sn{1}{2}(2))];
     
-    
-    %     %     delete(h)
-    %     %     set(handles.FilesLoadedText,'String',sprintf('%i files have been loaded.',numIDs))
-    %
-    %
-    %     if strcmp(get(handles.auto_mode,'checked'),'on')
-    %         set(handles.gobutton,'Visible','off')
-    %         BindSite('gobutton_Callback',handles.gobutton,[],guidata(hObject))
-    %         BindSite('save_pml_menu_Callback',handles.save_pml_menu,[],guidata(hObject))
-    %     else
-    %        set(handles.gobutton,'Visible','on')
-    %        set(handles.SettingsPanel,'Visible','on')
-    %     end
+    set(handles.DataSetName,'String',[sn,'_',subunit]);
+%     set(hObject,'String',FullFileList);
     delete(h);
 end
 
@@ -353,23 +322,32 @@ RiboLabCads_rRNA=[];
 RiboLabCads_rRNA_Names={};
 RiboLabCads_rProtein_Names={};
 RiboLabCads_rProtein=[];
+rRNA_Chains=[];
+rProtein_Chains=[];
+ProteinMenu=[];
 
 numCads=length(RiboLabCads);
 for i=1:numCads
     if strcmp(CadsTable(i,2),'rRNA')
         RiboLabCads_rRNA=[RiboLabCads_rRNA,RiboLabCads(i)];
         RiboLabCads_rRNA_Names=[RiboLabCads_rRNA_Names,CadsTable{i,3}];
+        rRNA_Chains=[rRNA_Chains,CadsTable{i,4}];
     elseif strcmp(CadsTable(i,2),'rProtein')
         RiboLabCads_rProtein=[RiboLabCads_rProtein,RiboLabCads(i)];
         RiboLabCads_rProtein_Names=[RiboLabCads_rProtein_Names,CadsTable{i,3}];
+        rProtein_Chains=[rProtein_Chains,CadsTable{i,4}];
+        ProteinMenu=[ProteinMenu;{[CadsTable{i,3},':',CadsTable{i,3},':',CadsTable{i,4}]}];
     end
     MoleculeChainMap.(['mol_',CadsTable{i,3}])=CadsTable{i,4};
     ChainMoleculeMap.(['chain_',CadsTable{i,4}])=CadsTable{i,3};
 end
+result.rRNA_Chains=rRNA_Chains;
+result.rProtein_Chains=rProtein_Chains;
 result.MoleculeChainMap=MoleculeChainMap;
 result.ChainMoleculeMap=ChainMoleculeMap;
 result.RiboLabCads_rProtein_Names=RiboLabCads_rProtein_Names;
 result.RiboLabCads_rRNA_Names=RiboLabCads_rRNA_Names;
+result.ProteinMenu=ProteinMenu;
 
 %%
      RiboLabMap = Map2D(get(handles.DataSetName,'String'));
@@ -659,6 +637,67 @@ if get(handles.EntropyBox,'value')
 %         [result.Conservation_Table(1,:);{'varchar(11)','varchar(3)','char(1)',...
 %         'real(5,4)','real(5,4)','real(5,4)','real(5,4)','real(5,4)','real(5,4)'};result.Conservation_Table(2:end,:)]);
 end
+
+%%Species Table Load CSV
+SpeciesTable=struct();
+spn=result.RiboLabCads_rRNA(1).Species{1};
+sn=regexp(spn,'([^\s]+)\s(.+)','tokens');
+
+SpeciesTable.Species_Name=[upper(sn{1}{1}(1)),lower(sn{1}{1}(2:end)),' ',...
+    lower(sn{1}{2})];
+
+dsn=get(handles.DataSetName,'String');
+if strfind(dsn,'_') > 0
+    dsn2=regexp(dsn,'([^_]+)_(.+)','tokens');
+    SpeciesTable.Species_Abr=dsn2{1}{1};
+    SpeciesTable.Subunit=dsn2{1}{2};
+else 
+    SpeciesTable.Species_Abr=dsn;
+    SpeciesTable.Subunit='other';
+
+end
+
+SpeciesTable.DataSetName='<b>3D-based Structure</b> (recommended)';
+SpeciesTable.MapType='3D-based';
+SpeciesTable.Orientation='portrait';
+SpeciesTable.SS_Table=[dsn,'_3D'];
+SpeciesTable.Font_Size_SVG=RiboLabMap.FontSize;
+% Magic correction factor for canvas font size. Reason unknown. 
+SpeciesTable.Font_Size_Canvas=0.8*RiboLabMap.FontSize;
+% Magic number to get reasonably sized circles. 
+SpeciesTable.Circle_Radius=.55*RiboLabMap.FontSize;
+SpeciesTable.PDB_chains=result.rRNA_Chains;
+SpeciesTable.Molecule_Names=strjoin(result.RiboLabCads_rRNA_Names,':');
+SpeciesTable.PDB_chains_rProtein=result.rProtein_Chains;
+SpeciesTable.Molecule_Names_rProtein=strjoin(result.RiboLabCads_rProtein_Names,':');
+%File copy to these names must be done manually right now. 
+SpeciesTable.PDB_File_rRNA=[dsn,'_rRNA.pdb'];
+SpeciesTable.PDB_File_rProtein=[dsn,'_rProteins.pdb'];
+SpeciesTable.Jmol_Script=[SpeciesTable.Species_Abr,'_LSU_SSU.spt'];
+%Not accurate model numbers yet.
+SpeciesTable.Jmol_Model_Num_rRNA='1';
+SpeciesTable.Jmol_Model_Num_rProtein='2';
+SpeciesTable.TextLabels=[SpeciesTable.SS_Table,'_TextLabels'];
+SpeciesTable.LineLabels=[SpeciesTable.SS_Table,'_LineLabels'];
+SpeciesTable.ProteinMenu=strjoin(result.ProteinMenu,';');
+SpeciesTable.AlnMenu='Shannon Entropy:Shannon_Entropy';
+SpeciesTable.StructDataMenu=['"None:\''""''\;Rainbow:\''map_Index\'';Onion:\''',...
+    'Onion\'',OnionColors,\''1\'';FineOnion:\''FineOnion\'';B factors:\''',...
+    'mean_tempFactor\'';Domains:\''Domains_Color\'',DomainColors,\''1\''"'];
+SpeciesTable.InterActionMenu=['Base Pairs:',dsn,'_BasePairs;Base Stacking:',...
+    dsn,'_Stacking;Base Phosphate:',dsn,'_BasePhosphate;Base Sugar:',dsn,...
+    '_BaseSugar;Protein Interactions:',dsn,'_NPN'];
+SpeciesTable.ConservationTable=[dsn,'_ConservationTable'];
+
+
+
+
+
+writetable(struct2table(SpeciesTable), [DataSetName_path,...
+    '\',get(handles.DataSetName,'String'),'_SpeciesTable','.csv'] );
+
+%%Species Table Load SQL
+
 % --- Executes on button press in DomainDefbox.
 function DomainDefbox_Callback(hObject, eventdata, handles)
 % hObject    handle to DomainDefbox (see GCBO)
