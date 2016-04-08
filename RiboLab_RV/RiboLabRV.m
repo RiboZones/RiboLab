@@ -331,11 +331,11 @@ for i=1:numCads
     if strcmp(CadsTable(i,2),'rRNA')
         RiboLabCads_rRNA=[RiboLabCads_rRNA,RiboLabCads(i)];
         RiboLabCads_rRNA_Names=[RiboLabCads_rRNA_Names,CadsTable{i,3}];
-        rRNA_Chains=[rRNA_Chains,CadsTable{i,4}];
+        rRNA_Chains=[rRNA_Chains,';',CadsTable{i,4}];
     elseif strcmp(CadsTable(i,2),'rProtein')
         RiboLabCads_rProtein=[RiboLabCads_rProtein,RiboLabCads(i)];
         RiboLabCads_rProtein_Names=[RiboLabCads_rProtein_Names,CadsTable{i,3}];
-        rProtein_Chains=[rProtein_Chains,CadsTable{i,4}];
+        rProtein_Chains=[rProtein_Chains,';',CadsTable{i,4}];
         ProteinMenu=[ProteinMenu;{[CadsTable{i,3},':',CadsTable{i,3},':',CadsTable{i,4}]}];
     end
     MoleculeChainMap.(['mol_',CadsTable{i,3}])=CadsTable{i,4};
@@ -666,10 +666,10 @@ SpeciesTable.Font_Size_SVG=RiboLabMap.FontSize;
 SpeciesTable.Font_Size_Canvas=0.8*RiboLabMap.FontSize;
 % Magic number to get reasonably sized circles. 
 SpeciesTable.Circle_Radius=.55*RiboLabMap.FontSize;
-SpeciesTable.PDB_chains=result.rRNA_Chains;
-SpeciesTable.Molecule_Names=strjoin(result.RiboLabCads_rRNA_Names,':');
-SpeciesTable.PDB_chains_rProtein=result.rProtein_Chains;
-SpeciesTable.Molecule_Names_rProtein=strjoin(result.RiboLabCads_rProtein_Names,':');
+SpeciesTable.PDB_chains=result.rRNA_Chains(2:end);
+SpeciesTable.Molecule_Names=strjoin(result.RiboLabCads_rRNA_Names,';');
+SpeciesTable.PDB_chains_rProtein=result.rProtein_Chains(2:end);
+SpeciesTable.Molecule_Names_rProtein=strjoin(result.RiboLabCads_rProtein_Names,';');
 %File copy to these names must be done manually right now. 
 SpeciesTable.PDB_File_rRNA=[dsn,'_rRNA.pdb'];
 SpeciesTable.PDB_File_rProtein=[dsn,'_rProteins.pdb'];
