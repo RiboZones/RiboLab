@@ -7,7 +7,7 @@ function [ CT_struct ] = XRNA2CT( xrna_file, varargin )
 %New version supports multiple strands.
 index=0;
 WriteToFile=false();
-
+ResidueSubet={};
 if nargin > 1
     for ind=1:length(varargin)/2
         switch varargin{2*ind-1}
@@ -44,7 +44,11 @@ end
 ConcatResidueList=vertcat(ResidueList{:});
 
 %% Residue List Filter
-KeptResidueList=ConcatResidueList(ismember(ConcatResidueList,ResidueSubet));
+if isempty(ResidueSubet)
+    KeptResidueList=ConcatResidueList;
+else
+    KeptResidueList=ConcatResidueList(ismember(ConcatResidueList,ResidueSubet));
+end
 
 %% Calculate strand starts, ends, and ParsedBases based on optional filtered data.
 for i=1:numStrands

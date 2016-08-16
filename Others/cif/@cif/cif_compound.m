@@ -27,7 +27,11 @@ for i=1:numIDs
     I=ismember(label_entity_id,entity_id{i});
     x=unique(label_asym_id(I));
     if isnumeric(assembly)
-        selected=ismember(x,strsplit(asym_id_list{assembly},','));
+        if iscell(asym_id_list)
+            selected=ismember(x,strsplit(asym_id_list{assembly},','));
+        else
+             selected=ismember(x,strsplit(asym_id_list,','));
+        end
     else
         selected=true(1,length(x));
     end
