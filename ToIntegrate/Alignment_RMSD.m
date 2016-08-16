@@ -40,7 +40,7 @@ for iii=1:length(Aln_Struct(1).Sequence)
 end
 
 RemoveAln3_A=ismember(cellstr(RV_Lab_Struct1.RiboLabCads_rRNA(1).Alignment(Species_Ind3).Sequence')','-');
-%RemoveAln3_B=ismember(cellstr(RV_Lab_Struct2.RiboLabCads_rRNA(1).Alignment(Species_Ind3).Sequence')','-');
+RemoveAln3_B=ismember(cellstr(RV_Lab_Struct2.RiboLabCads_rRNA(1).Alignment(Species_Ind3).Sequence')','-');
 
 
 RL1=RV_Lab_Struct1.RiboLabMap.ItemNames(KeepAln1);
@@ -109,7 +109,7 @@ RMSD_Aln.RL2=RL2;
 RMSD_Aln.RMSD_Full1=RMSD_Full1;
 RMSD_Aln.RMSD_Full2=RMSD_Full2;
 RMSD_Aln.X=I1(both);
-RMSD_Aln.x.orig=str2num(char(regexprep(ResCom1.ItemNames(I1(both)),'[A-z\d]_','')));
+RMSD_Aln.x.orig=str2double(char(regexprep(ResCom1.ItemNames(I1(both)),'[A-z\d]+_','')));
 RMSD_Aln.RMSD.orig=RMSD;
 if isempty(RemoveResi)
     RMSD_Aln.x.renumber=RMSD_Aln.x.orig;
@@ -120,13 +120,19 @@ else
     oldresi=rr(~removeresi);
     for i=1:length(oldresi)
         [~,I]=ismember(oldresi{i},AlnMap(1,:));
-         RMSD_Aln.x.renumber(i)=str2double(regexprep(AlnMap{2,I},'[A-z\d]_',''));
+         RMSD_Aln.x.renumber(i)=str2double(regexprep(AlnMap{2,I},'[A-z\d]+_',''));
     end
    
     RMSD_Aln.RMSD.renumber=RMSD_Aln.RMSD.orig(~removeresi);
     %error('come fix me');
     %RMSD_Aln.RMSD.renumber=RMSD(I1>0 & I2>0 & I3 >0);
 end
+x=find(KeepAln1 & ~RemoveAln3_A);
+RMSD_Aln.x.Species1=x(both);
+y=find(KeepAln2 & ~RemoveAln3_B);
+RMSD_Aln.x.Species2=y(both);
+% RMSD_Aln.x.Species3=find(KeepAln3);
+
 %RMSD_Aln.x.renumber=str2num(char(regexprep(ResCom3.ItemNames(I3(I1>0 & I2>0 & I3 >0)),'[A-z\d]_','')));
 %[~,III]=setdiff(RMSD_Aln.x.renumber,RMSD_Aln.x.orig);
 %if isempty(III)
