@@ -4,7 +4,7 @@ function [ H_CoVar, F_CoVar,MostFreqBasePair,Dyads ] = CoVarEntropy( Alignment, 
 
 %Assumes dedupped tables.
 
-BasePairClasses={{'CG','GC','AU','UA','GA','AG','GU','UG','AC','CA','UU'}};
+BasePairClasses={{'CG','GC','AU','UA','GA','AG','GU','UG','AC','CA','UU','UC','CU'}};
 AllPairs={'AA','AC','AG','AU','CA','CC','CG','CU','GA','GC','GG','GU','UA','UC','UG','UU'};
 FreqCutoff=0.95;
 CombineSymmetry=false;
