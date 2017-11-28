@@ -281,40 +281,49 @@ classdef Map2D < handle
             fclose(fid);
             
         end
-        function [Table]=BasicTable(myMap,UniqueResSeq,varargin)
+        function [Table]=BasicTable(myMap,ResidueList)
             
             %             startIndex=0;
             numResi=length(vertcat(myMap.ItemNames));
             
             Table=cell(numResi,7);
             Table(:,1)=num2cell(1:numResi);
-            Table(:,2)=vertcat(regexprep(myMap.ItemNames,'[\w\d]+_',''));
-            if isfield(myMap.Other,'Letter')
-                Table(:,3)={myMap.Other.Letter}';
+            if nargin > 1
+                split=regexp(ResidueList,':','split');
             else
-                Table(:,3)={myMap.Other.LabelText}';
+                split=regexp(ResidueList,'_','split');
             end
-            Table(:,4)=vertcat(regexprep(myMap.ItemNames,'_[\w\d]+',''));
-            d=regexp(unique(UniqueResSeq),'(.+)_[\s]*([\w]+)','tokens');
-            d=[d{:}];
-            residue_Chain_list=vertcat(d{:});
-            residue_list=residue_Chain_list(:,2);
-            xtalindex=1:length(residue_list);
-            if strfind(myMap.ItemNames{end},'_')>0
-                residue_list=strcat(residue_Chain_list(:,1),'_',...
-                    residue_Chain_list(:,2));
+            v=vertcat(split{:});
+            Table(:,2)=v(:,1);
+            Table(:,3)=v(:,2);
+            if isfield(myMap.Other,'Letter')
+                Table(:,4)={myMap.Other.Letter}';
+                Table(:,5)={myMap.Other.Letter}';
+            else
+                Table(:,4)={myMap.Other.LabelText}';
+                Table(:,5)={myMap.Other.LabelText}';
             end
-            [inMap,I]=ismember(residue_list,myMap.ItemNames);
-            [~,II]=sort(I(I~=0));
-            r=residue_list(inMap);
-            [~,III]=ismember(r(II),myMap.ItemNames);
+            %Table(:,5)=vertcat(regexprep(myMap.ItemNames,'_[\w\d]+',''));
+           % d=regexp(unique(UniqueResSeq),'(.+)_[\s]*([\w]+)','tokens');
+            %d=[d{:}];
+            %residue_Chain_list=vertcat(d{:});
+           % residue_list=residue_Chain_list(:,2);
+           % xtalindex=1:length(residue_list);
+           % if strfind(myMap.ItemNames{end},'_')>0
+           %     residue_list=strcat(residue_Chain_list(:,1),'_',...
+            %        residue_Chain_list(:,2));
+            %end
+            %[inMap,I]=ismember(residue_list,myMap.ItemNames);
+            %[~,II]=sort(I(I~=0));
+            %r=residue_list(inMap);
+            %[~,III]=ismember(r(II),myMap.ItemNames);
             
             
-            xtal_index=cell(length(myMap.ItemNames),1);
-            xtal_index(III)=num2cell(xtalindex(II));
-            Table(:,5)=num2cell(myMap.X);
-            Table(:,6)=num2cell(myMap.Y);
-            Table(:,7)=xtal_index;
+            %xtal_index=cell(length(myMap.ItemNames),1);
+            %xtal_index(III)=num2cell(xtalindex(II));
+            Table(:,6)=num2cell(myMap.X);
+            Table(:,7)=num2cell(myMap.Y);
+            %Table(:,8)=xtal_index;
             
         end
         

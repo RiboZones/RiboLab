@@ -12,8 +12,8 @@ if nargin > 1
         end
     end
 end
-
-textfile=fileread(fred_text_file);
+% Strip commas, should never be needed in this type of input. 
+textfile=regexprep(fileread(fred_text_file),'"','');
 
 switch FR3Dstyle
     case 'old'

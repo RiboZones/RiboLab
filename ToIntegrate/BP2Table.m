@@ -247,7 +247,6 @@ switch TableFormat
                     tables{i}(3:numLines+2,5)=repmat({Protein_Col{i}},numLines,1);
                 end
             end
-            
         end
         if Merge
             Table=vertcat(tables{:});
@@ -260,6 +259,57 @@ switch TableFormat
         else
             Table=tables;
         end
+    case 'website2'
+        % For version 2.0 of RiboVision
+        tables=cell(numBP,1);
+        for i=1:numBP
+            %             if (iscell(Protein_Col) || Protein_Col)
+            %                 tables{i}(1,:)={'pairIndex','resIndex1','resIndex2','bp_type','ProteinName'};
+            %                 tables{i}(2,:)={'int','int','int','varchar(6)','varchar(6)'};
+            %             else
+            %                 tables{i}(1,:)={'pairIndex','resIndex1','resIndex2','bp_type'};
+            %                 tables{i}(2,:)={'int','int','int','varchar(6)'};
+            %             end
+            
+            c1={BP(i).Data.BP1_Chain};c2={BP(i).Data.BP2_Chain};
+            d1={BP(i).Data.BP1_Num};d2={BP(i).Data.BP2_Num};
+            e1={c1{:};d1{:}}'; e2={c2{:};d2{:}}';
+            if ~isempty(BP(i).Data)
+                ResListA=strcat(e1(:,1), e1(:,2));
+                ResListB=strcat(e2(:,1), e2(:,2));
+                [~,I1]=ismember(ResListA,regexprep(ItemList,'_',''));
+                [~,I2]=ismember(ResListB,regexprep(ItemList,'_',''));
+                Keep = (I1~=0) & (I2~=0);
+                numLines=sum(Keep);
+                %tables{i}(1:numLines,1)=strtrim(cellstr(num2str((1:numLines)')));
+                tables{i}(1:numLines,1)=strtrim(cellstr(num2str(I1(Keep)-1)));
+                tables{i}(1:numLines,2)=strtrim(cellstr(num2str(I2(Keep)-1)));
+                tables{i}(1:numLines,3)={BP(i).Data(Keep).BP_Type};
+                
+                if iscell(BP(i).Name)
+                    tables{i}(1:numLines,4)=BP(i).Name;
+                else
+                    tables{i}(1:numLines,4)={BP(i).Data(1).BP_Type};
+                end
+                if iscell(Protein_Col)
+                    % Overwrite useless npn subtype with protein name. 
+                    tables{i}(1:numLines,3)=repmat({Protein_Col{i}},numLines,1);
+                    tables{i}(1:numLines,5)={BP(i).Data(Keep).ResName};
+                    tables{i}(1:numLines,6)={BP(i).Data(Keep).ResNo};
+                end
+            end
+        end
+        %if Merge
+        Table=vertcat(tables{:});
+        %Remove headers. Maybe later don't even put them in.
+        %Table(ismember(Table(:,1),{'int','pairIndex'}),:)=[];
+        % Reindex
+        %for j = 1:size(Table,1)
+        %Table{j,1}=num2str(j);
+        %end
+        %else
+        %Table=tables;
+        % end
     case 'CustomData'
         tables=cell(numBP,1);
         for i=1:numBP

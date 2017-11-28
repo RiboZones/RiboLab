@@ -5,14 +5,9 @@ function BP=ContactMap2BP(CADS_object,varargin)
 Species_ind=1;
 MapMode='betweenChains';
 bp_type='';
-BP_FieldNames={'BP1_Name','BP1_Num','BP1_Chain','BP2_Name','BP2_Num','BP2_Chain'};
+BP_FieldNames={'BP1_Name','BP1_Num','BP1_Chain','BP2_Name','BP2_Num','BP2_Chain','ResNo','ResName'};
 BP_Order=[1,2,3,4,5,6];
 bp_reverse=false;
-
-%for right now, let's make this support single CADS objects
-%if length(CADS_object) > 1
-%   error('single CADS only please')
-%end
 
 numObjs=length(CADS_object);
 
@@ -44,6 +39,7 @@ for numSet = 1: numObjs
         repmat({''},numSamples,1),'BP1_Num',repmat({''},numSamples,1),'BP1_Chain',...
         repmat({''},numSamples,1),'BP2_Name',repmat({''},numSamples,1),'BP2_Num',...
         repmat({''},numSamples,1),'BP2_Chain',repmat({''},numSamples,1),'BP_Type',...
+        repmat({''},numSamples,1),'ResNo',repmat({''},numSamples,1),'ResName',...
         repmat({''},numSamples,1),'BP_Nesting',repmat({''},numSamples,1));
     BP(numSet)=struct('Name',CADS_object(numSet).Name,'Chain',CADS_object(numSet).PDB(Species_ind).PDB.Model.Atom(1).chainID,...
         'Data',DataStruct);
@@ -61,6 +57,7 @@ for numSet = 1: numObjs
                         BP(numSet).Data(dataind).Index=num2str(dataind);
                         contactsA=regexp(CADS_object(numSet).Results(Species_ind).FilteredMap(1).Y{i,3}(j,:),'(?<name>[^-]+)_(?<chain>[^_]*)_[\s]*(?<number>[\w]+)','names');
                         contactsB=regexp(CADS_object(numSet).Results(Species_ind).FilteredMap(1).Y{i,3}(k,:),'(?<name>[^-]+)_(?<chain>[^_]*)_[\s]*(?<number>[\w]+)','names');
+                        resContact=regexp(CADS_object(numSet).Results(Species_ind).FilteredMap(1).Y{i,2},'(?<name>[^-]+)_(?<chain>[^_]*)_[\s]*(?<number>[\w]+)','names');
                         
                         BP(numSet).Data(dataind).BP1_Name=contactsA.name;
                         BP(numSet).Data(dataind).BP1_Num=contactsA.number;
@@ -68,6 +65,8 @@ for numSet = 1: numObjs
                         BP(numSet).Data(dataind).BP2_Name=contactsB.name;
                         BP(numSet).Data(dataind).BP2_Num=contactsB.number;
                         BP(numSet).Data(dataind).BP2_Chain=contactsB.chain;
+                        BP(numSet).Data(dataind).ResNo=resContact.number;
+                        BP(numSet).Data(dataind).ResName=resContact.name;
                         BP(numSet).Data(dataind).BP_Type=bp_type;
                         BP(numSet).Data(dataind).BP_Nesting='';
                         dataind=dataind+1;

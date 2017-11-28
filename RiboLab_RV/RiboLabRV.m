@@ -258,28 +258,31 @@ if ~isequal(FileName,0) && ~isequal(PathName,0)
             x=regexp(RiboLabCads(i).Name,'([\d\.]+S)','tokens');
             if isempty(x)
                 x=regexp(RiboLabCads(i).Name,'([^:]+):','tokens');
-                CadsTable(i,3)=regexprep(x{1},'\.','p');
-                CadsTable{i,2}='other';
+                CadsTable(i,4)=regexprep(x{1},'\.','p');
+                CadsTable{i,3}='other';
+                CadsTable{i,2}='LSU'; % Guess, needs manual correcting. 
             else
-                CadsTable(i,3)=x{1};
-                CadsTable{i,2}='rRNA';
+                CadsTable(i,4)=x{1};
+                CadsTable{i,3}='rRNA';
+                CadsTable{i,2}='LSU'; % Guess, needs manual correcting. 
             end
         else
             %CadsTable(i,3)=regexprep(x{1},'-','');
             %Sanitize names to be valid field names. Remove later maybe. 
             t=regexprep(x{1},'[^\w]+','_');
-            CadsTable(i,3)=regexprep(t,'^(\d)','z$1');
+            CadsTable(i,4)=regexprep(t,'^(\d)','z$1');
 
             %Guess subunit based on first rProtein. 
-            if isempty(subunit) && strcmp(x{1}{1}(1),'L')
+            if strcmp(x{1}{1}(1),'L')
                 subunit='LSU';
-            elseif isempty(subunit) && strcmp(x{1}{1}(1),'S')
+            elseif strcmp(x{1}{1}(1),'S')
                 subunit='SSU';
             end
-            CadsTable{i,2}='rProtein';
+            CadsTable{i,3}='rProtein';
+            CadsTable{i,2}=subunit;
         end
         y=regexp(RiboLabCads(i).Name,':\sChain\(s\)\s([\w\d]+)','tokens');
-        CadsTable(i,4)=y{1};
+        CadsTable(i,5)=y{1};
     end
     set(handles.MoleculeNamesTable,'Data',CadsTable);
     set(handles.customAtomN,'enable','on');
@@ -410,10 +413,11 @@ if get(handles.FR3D_InteractionsBox,'value')
         result.RiboLabFullBP(i).Name=['rRNA ',num2str(i)];
     end
     [~,FilteredBP]=PlotBPbyType(result.RiboLabFullBP,RiboLabMap,'DisplayPlots',false);
-    BP2Table([FilteredBP{:}],'TableFormat','website','ItemList',RiboLabMap.ItemNames);
+    %BP2Table([FilteredBP{:}],'TableFormat','website','ItemList',RiboLabMap.ItemNames);
     BPorg=BPorganize([FilteredBP{:}]);
+    BPorg(5)=[]; % Remove other type
     DeDupped_BPs=DeDupBP(BPorg);
-    FR3D_Interaction_Tables=BP2Table(DeDupped_BPs,'TableFormat','website','ItemList',RiboLabMap.ItemNames,'Merge',false);
+    FR3D_Interaction_Tables=BP2Table(DeDupped_BPs,'TableFormat','website2','ItemList',RiboLabMap.ItemNames,'Merge',false);
     result.FR3D_Interaction_Tables=FR3D_Interaction_Tables;
 end
 if get(handles.EntropyBox,'value') || get(handles.CoVarEntropyBox,'value')
@@ -495,7 +499,7 @@ if get(handles.ProteinContactsBox,'value') || get(handles.MagContactsBox,'value'
     end
     if get(handles.ProteinInteractionBox,'value')
         RiboLab_BP_NPN = ContactMap2BP(RiboLabCads_rProtein,'MapMode','withinTarget','bp_type','NPN');
-        Protein_Interaction_Table=BP2Table(RiboLab_BP_NPN,'TableFormat','website','ItemList',RiboLabMap.ItemNames,'ProteinCol',RiboLabCads_rProtein_Names);
+        Protein_Interaction_Table=BP2Table(RiboLab_BP_NPN,'TableFormat','website2','ItemList',RiboLabMap.ItemNames,'ProteinCol',RiboLabCads_rProtein_Names);
         result.Protein_Interaction_Table=Protein_Interaction_Table;
     end
     if get(handles.MagContactsBox,'value')
@@ -511,7 +515,7 @@ if get(handles.ProteinContactsBox,'value') || get(handles.MagContactsBox,'value'
                 RiboLabCads(m).FilterMap('AtomFilterType',{'magnesium','rna'},'Subsets',[],'ResidueTarget',{RVResidues},'RealAtomsNames_B',RealAtomsNames_B);
                 %disp([k,m]);
             end
-            Mg_Individual_Contact_Table{k}=ProteinContactTable(RiboLabCads,RiboLabMap,'TableFormat','website','Magnesium',true,'CombineCols',true);
+            Mg_Individual_Contact_Table{k}=ProteinContactTable(RiboLabCads,RiboLabMap,'TableFormat','website2','Magnesium',true,'CombineCols',true);
         end
         result.Mg_Individual_Contact_Table=Mg_Individual_Contact_Table(end:-1:1); 
         result.MgColNames=MgColNames(end:-1:1);
@@ -519,7 +523,7 @@ if get(handles.ProteinContactsBox,'value') || get(handles.MagContactsBox,'value'
     
     if get(handles.MagInteractionBox,'value')
         RiboLab_BP_NMN = ContactMap2BP(RiboLabCads,'MapMode','withinTarget','bp_type','NMN');
-        Magnesium_Interaction_Table=BP2Table(RiboLab_BP_NMN,'TableFormat','website','ItemList',RiboLabMap.ItemNames);
+        Magnesium_Interaction_Table=BP2Table(RiboLab_BP_NMN,'TableFormat','website2','ItemList',RiboLabMap.ItemNames);
         result.Magnesium_Interaction_Table=Magnesium_Interaction_Table;
     end
 end
@@ -538,88 +542,94 @@ function SaveBtn_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 result=get(handles.output,'UserData');
 RiboLabMap=result.RiboLabMap;
-RiboLabCads_rRNA= result.RiboLabCads_rRNA;
+%RiboLabCads_rRNA= result.RiboLabCads_rRNA;
 %result.RiboLabCads_rProtein_Names
 %result.RiboLabCads_rRNA_Names
 %RiboLabCads_rProtein = result.RiboLabCads_rProtein;
 %ResidueList=result.ResidueList;
-R=[RiboLabCads_rRNA.PDB];
-Table = RiboLabMap.BasicTable(vertcat(R.UniqueResSeq));
-TableHeader={'map_Index','resNum','resName','ChainID','X','Y','Xtal_Index';'int',...
-    'varchar(7)','varchar(3)','char(2)','real(8,3)','real(8,3)','int'};
-
-
+%R=[RiboLabCads_rRNA.PDB];
+Table = RiboLabMap.BasicTable(result.ResidueList);
+split_name=regexp(get(handles.DataSetName,'String'),'_','split');
+if length(split_name) < 2
+    split_name{2}='';
+end
+Table=[Table,repmat(split_name,length(Table),1)];
+TableHeader={};
+Table_SD={};
 if get(handles.DomainDefbox,'value')
-    Table=[Table,result.Domain_Table(:,2:4)];
-    TableHeader=[TableHeader,{'Domain_RN','Domain_AN','Domains_Color';'varchar(4)','char(1)','int'}];
+    Table_SD=[Table_SD,result.Domain_Table(:,2:4)];
+    TableHeader=[TableHeader,{'Domain_RN','Domain_AN','Domains_Color'}];
 end
 if get(handles.helixDefBox,'value')
-    Table=[Table,result.Helix_Table(:,2:3)];
-    TableHeader=[TableHeader,{'Helix_Num','Helix_Color';'varchar(4)','int'}];
+    Table_SD=[Table_SD,result.Helix_Table(:,2:3)];
+    TableHeader=[TableHeader,{'Helix_Num','Helix_Color'}];
 end
 if get(handles.fineOnionBox,'value')
-    Table=[Table,result.Fine_Onion_Table(:,2)];
-    TableHeader=[TableHeader,{'FineOnion';'real(8,3)'}];
+    Table_SD=[Table_SD,result.Fine_Onion_Table(:,2)];
+    TableHeader=[TableHeader,{'FineOnion'}];
 end
 if get(handles.coarseOnionBox,'value')
-    Table=[Table,result.Coarse_Onion_Table(:,2)];
-    TableHeader=[TableHeader,{'Onion';'int'}];
+    Table_SD=[Table_SD,result.Coarse_Onion_Table(:,2)];
+    TableHeader=[TableHeader,{'Onion'}];
 end
 if get(handles.meanBFactBox,'value')
-    Table=[Table,result.Thermal_Factor_Table(:,2)];
-    TableHeader=[TableHeader,{'mean_tempFactor';'real(8,3)'}];
+    Table_SD=[Table_SD,result.Thermal_Factor_Table(:,2)];
+    TableHeader=[TableHeader,{'mean_tempFactor'}];
 end
 if get(handles.EntropyBox,'value')
-    Table=[Table,result.Entropy_Table(:,2)];
-    TableHeader=[TableHeader,{'Shannon_Entropy';'real(5,3)'}];
+    Table_SD=[Table_SD,result.Entropy_Table(:,2)];
+    TableHeader=[TableHeader,{'Shannon_Entropy'}];
 end
 if get(handles.CoVarEntropyBox,'value')
-    Table=[Table,result.CoVarEntropy_Table(:,2)];
-    TableHeader=[TableHeader,{'CoVar_Entropy';'real(5,3)'}];
+    Table_SD=[Table_SD,result.CoVarEntropy_Table(:,2)];
+    TableHeader=[TableHeader,{'CoVar_Entropy'}];
 end
 if get(handles.ProteinContactsBox,'value')
-    Table=[Table,result.Protein_Contact_Table(:,2:end)];
-    TableHeader=[TableHeader,[result.RiboLabCads_rProtein_Names;repmat({'int'},1,length(result.RiboLabCads_rProtein_Names))]];
+    Table_SD=[Table_SD,result.Protein_Contact_Table(:,2:end)];
+    TableHeader=[TableHeader,[result.RiboLabCads_rProtein_Names]];
 end
 if get(handles.MagContactsBox,'value')
     d=[result.Mg_Individual_Contact_Table{:}];
     numMgCols=length(result.Mg_Individual_Contact_Table);
     e=[d{:}];
-    Table=[Table,e(:,2:2:2*numMgCols)];
-    TableHeader=[TableHeader,[result.MgColNames;repmat({'int'},1,numMgCols)]];
+    Table_SD=[Table_SD,e(:,2:2:2*numMgCols)];
+    TableHeader=[TableHeader,[result.MgColNames]];
 end
 
 [DataSetName_path]=fileparts(result.File);
-writetable(cell2table(Table,'VariableNames',TableHeader(1,:)), [DataSetName_path,...
-    '\',get(handles.DataSetName,'String'),'.csv'] );
+writetable(cell2table(Table,'VariableNames',{'map_Index','molName','resNum','unModeResName','modResName','X','Y','Species_Abr','AltForm'}), [DataSetName_path,...
+    '\',get(handles.DataSetName,'String'),'_SecondaryStructures','.csv'] );
+
+if ~isempty(Table_SD)
+    writetable(cell2table(Table_SD,'VariableNames',TableHeader(1,:)), [DataSetName_path,...
+    '\',get(handles.DataSetName,'String'),'_StructuralData','.csv'] );
+end
 
 % xlswrite([DataSetName_path,'\',get(handles.DataSetName,'String'),'.xlsx'],vertcat(TableHeader,Table));
 if get(handles.ProteinInteractionBox,'value')
-    NPN=[{'pairIndex','resIndex1','resIndex2','bp_type','ProteinName'};
-     {'int','int','int','varchar(6)','varchar(6)'};
-        result.Protein_Interaction_Table];
-    writetable(cell2table(result.Protein_Interaction_Table,'VariableNames',NPN(1,:)), [DataSetName_path,...
-    '\',get(handles.DataSetName,'String'),'_NPN','.csv'] );
+    NPN={'resIndex1','resIndex2','bp_type','bp_group','ProteinResName','ProteinResNo','StructureName'};
+    writetable(cell2table([result.Protein_Interaction_Table,cellstr(repmat(result.RiboLabPDBs.CIF(1).val,...
+        length(result.Protein_Interaction_Table),1))],'VariableNames',NPN),...
+        [DataSetName_path,'\',get(handles.DataSetName,'String'),'_NPN','.csv'] );
 %     xlswrite([DataSetName_path,'\',get(handles.DataSetName,'String'),'_NPN','.xlsx'],NPN);
     
 end
 if get(handles.MagInteractionBox,'value')
-    NMN=[{'pairIndex','resIndex1','resIndex2','bp_type'};
-     {'int','int','int','varchar(6)'};
-        result.Magnesium_Interaction_Table(:,1:4)];
-    writetable(cell2table(result.Magnesium_Interaction_Table(:,1:4),'VariableNames',NMN(1,:)), [DataSetName_path,...
-    '\',get(handles.DataSetName,'String'),'_NMN','.csv'] );
+    NMN={'resIndex1','resIndex2','bp_type','bp_group','StructureName'};
+    writetable(cell2table([result.Magnesium_Interaction_Table,cellstr(repmat(result.RiboLabPDBs.CIF(1).val,...
+        length(result.Magnesium_Interaction_Table),1))],'VariableNames',NMN), [DataSetName_path,...
+        '\',get(handles.DataSetName,'String'),'_NMN','.csv'] );
 %     xlswrite([DataSetName_path,'\',get(handles.DataSetName,'String'),'_NMN','.xlsx'],NMN);
     
 end
 if get(handles.FR3D_InteractionsBox,'value')
-    Names={'BasePairs','Stacking','BaseSugar','BasePhosphate'};
-    for i=1:length(Names)
-        writetable(cell2table(result.FR3D_Interaction_Tables{i}(3:end,1:4),...
-            'VariableNames',result.FR3D_Interaction_Tables{i}(1,1:4)), [DataSetName_path,...
-        '\',get(handles.DataSetName,'String'),'_',Names{i},'.csv'] );
-        %         xlswrite([DataSetName_path,'\',get(handles.DataSetName,'String'),'_',Names{i},'.xlsx'],...
-    end
+    NN={'resIndex1','resIndex2','bp_type','bp_group','StructureName'};
+    %for i=1:length(Names)
+    writetable(cell2table([result.FR3D_Interaction_Tables,cellstr(repmat(result.RiboLabPDBs.CIF(1).val,...
+        length(result.FR3D_Interaction_Tables),1))],'VariableNames',NN), [DataSetName_path,...
+        '\',get(handles.DataSetName,'String'),'_FR3D','.csv'] );
+    %         xlswrite([DataSetName_path,'\',get(handles.DataSetName,'String'),'_',Names{i},'.xlsx'],...
+   % end
 end
 if get(handles.ProteinOnionBox,'value')
      writetable(cell2table(result.Protein_Onion_Table,...
@@ -653,48 +663,64 @@ if strfind(dsn,'_') > 0
     SpeciesTable.Subunit=dsn2{1}{2};
 else 
     SpeciesTable.Species_Abr=dsn;
-    SpeciesTable.Subunit='other';
+    %SpeciesTable.Subunit='other';
 
 end
 
-SpeciesTable.DataSetName='<b>3D-based Structure</b> (recommended)';
-SpeciesTable.MapType='3D-based';
-SpeciesTable.Orientation='portrait';
-SpeciesTable.SS_Table=[dsn,'_3D'];
-SpeciesTable.Font_Size_SVG=RiboLabMap.FontSize;
+%SpeciesTable.Species_Name=spn;
+%SpeciesTable.DataSetName='<b>3D-based Structure</b> (recommended)';
+%SpeciesTable.MapType='3D-based';
+%SpeciesTable.Orientation='portrait';
+SpeciesTable.SS_Table=[dsn,'_LSU'];
+SpeciesTable.Font_Size_SVG=round(RiboLabMap.FontSize,1);
 % Magic correction factor for canvas font size. Reason unknown. 
-SpeciesTable.Font_Size_Canvas=0.8*RiboLabMap.FontSize;
+SpeciesTable.Font_Size_Canvas=round(0.8*RiboLabMap.FontSize,1);
 % Magic number to get reasonably sized circles. 
-SpeciesTable.Circle_Radius=.55*RiboLabMap.FontSize;
-SpeciesTable.PDB_chains=result.rRNA_Chains(2:end);
-SpeciesTable.Molecule_Names=strjoin(result.RiboLabCads_rRNA_Names,';');
-SpeciesTable.PDB_chains_rProtein=result.rProtein_Chains(2:end);
-SpeciesTable.Molecule_Names_rProtein=strjoin(result.RiboLabCads_rProtein_Names,';');
-%File copy to these names must be done manually right now. 
-SpeciesTable.PDB_File_rRNA=[dsn,'_rRNA.pdb'];
-SpeciesTable.PDB_File_rProtein=[dsn,'_rProteins.pdb'];
-SpeciesTable.Jmol_Script=[SpeciesTable.Species_Abr,'_LSU_SSU.spt'];
-%Not accurate model numbers yet.
-SpeciesTable.Jmol_Model_Num_rRNA='1';
-SpeciesTable.Jmol_Model_Num_rProtein='2';
-SpeciesTable.TextLabels=[SpeciesTable.SS_Table,'_TextLabels'];
-SpeciesTable.LineLabels=[SpeciesTable.SS_Table,'_LineLabels'];
-SpeciesTable.ProteinMenu=strjoin(result.ProteinMenu,';');
-SpeciesTable.AlnMenu='Shannon Entropy:Shannon_Entropy';
-SpeciesTable.StructDataMenu=['"None:\''""''\;Rainbow:\''map_Index\'';Onion:\''',...
-    'Onion\'',OnionColors,\''1\'';FineOnion:\''FineOnion\'';B factors:\''',...
-    'mean_tempFactor\'';Domains:\''Domains_Color\'',DomainColors,\''1\''"'];
-SpeciesTable.InterActionMenu=['Base Pairs:',dsn,'_BasePairs;Base Stacking:',...
-    dsn,'_Stacking;Base Phosphate:',dsn,'_BasePhosphate;Base Sugar:',dsn,...
-    '_BaseSugar;Protein Interactions:',dsn,'_NPN'];
-SpeciesTable.ConservationTable=[dsn,'_ConservationTable'];
-
-
-
-
+SpeciesTable.Circle_Radius=round(.55*RiboLabMap.FontSize,1);
 
 writetable(struct2table(SpeciesTable), [DataSetName_path,...
     '\',get(handles.DataSetName,'String'),'_SpeciesTable','.csv'] );
+
+% Chain List
+numRNAs = length(result.RiboLabCads_rRNA_Names);
+ChainList=[cellstr(repmat(result.RiboLabPDBs.CIF(1).val,numRNAs,1)),...
+    result.RiboLabCads_rRNA_Names',regexp(result.rRNA_Chains(2:end),';','split')'];
+% After RNA, do protein
+numProts = length(result.RiboLabCads_rProtein_Names);
+ChainList=[ChainList; cellstr(repmat(result.RiboLabPDBs.CIF(1).val,numProts,1)),...
+   result.RiboLabCads_rProtein_Names',regexp(result.rProtein_Chains(2:end),';','split')'];
+
+writetable(cell2table(ChainList), [DataSetName_path,...
+    '\',get(handles.DataSetName,'String'),'_ChainList','.csv'] );
+
+%SpeciesTable.PDB_chains_rProtein=result.rProtein_Chains(2:end);
+%SpeciesTable.Molecule_Names_rProtein=strjoin(result.RiboLabCads_rProtein_Names,';');
+
+%File copy to these names must be done manually right now. 
+%SpeciesTable.PDB_File_rRNA=[dsn,'_rRNA.pdb'];
+%SpeciesTable.PDB_File_rProtein=[dsn,'_rProteins.pdb'];
+%SpeciesTable.Jmol_Script=[SpeciesTable.Species_Abr,'_LSU_SSU.spt'];
+%Not accurate model numbers yet.
+%SpeciesTable.Jmol_Model_Num_rRNA='1';
+%SpeciesTable.Jmol_Model_Num_rProtein='2';
+%SpeciesTable.TextLabels=[SpeciesTable.SS_Table,'_TextLabels'];
+%SpeciesTable.LineLabels=[SpeciesTable.SS_Table,'_LineLabels'];
+%SpeciesTable.ProteinMenu=strjoin(result.ProteinMenu,';');
+%SpeciesTable.AlnMenu='Shannon Entropy:Shannon_Entropy';
+%SpeciesTable.StructDataMenu=['"None:\''""''\;Rainbow:\''map_Index\'';Onion:\''',...
+    %'Onion\'',OnionColors,\''1\'';FineOnion:\''FineOnion\'';B factors:\''',...
+    %'mean_tempFactor\'';Domains:\''Domains_Color\'',DomainColors,\''1\''"'];
+%SpeciesTable.InterActionMenu=['Base Pairs:',dsn,'_BasePairs;Base Stacking:',...
+    %dsn,'_Stacking;Base Phosphate:',dsn,'_BasePhosphate;Base Sugar:',dsn,...
+   % '_BaseSugar;Protein Interactions:',dsn,'_NPN'];
+%SpeciesTable.ConservationTable=[dsn,'_ConservationTable'];
+
+
+
+
+
+%writetable(struct2table(SpeciesTable), [DataSetName_path,...
+  %  '\',get(handles.DataSetName,'String'),'_SpeciesTable','.csv'] );
 
 %%Species Table Load SQL
 

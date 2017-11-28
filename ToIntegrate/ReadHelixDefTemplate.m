@@ -6,7 +6,7 @@ txt=fscanf(fid,'%c');
 Helices=textscan(txt,'%[^\n\r]','delimiter','\n');
 fclose(fid);
 
-a = regexp(Helices{1}(2:end),'(?<Edges>[^,]+),H(?<Name>.*)' , 'names');
+a = regexp(Helices{1}(2:end),'(?<Edges>[^,]+),(?<Name>[Hh].*)' , 'names');
 HelicesA=[a{:}];
 
 NewHelicDef=repmat(struct('Name',{{}},'Edges',{{}},'mol_ind',1),length(a),1);
