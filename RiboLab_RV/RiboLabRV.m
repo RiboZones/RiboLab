@@ -944,8 +944,10 @@ elseif get(handles.customAtomN,'Value')
         OnionFiles.Center = [RiboLabPDBs(j).PDB.Model.Atom(I).X, RiboLabPDBs(j).PDB.Model.Atom(I).Y, RiboLabPDBs(j).PDB.Model.Atom(I).Z];
     end
 elseif get(handles.supPTC,'Value')
-    OnionFiles.Center=[-32.3240 123.0920 161.9990];
+    % New center based on cif file, 4V9D
+    OnionFiles.Center=[-79.501 -50.248 4.312];
 elseif get(handles.supDCC,'Value')
+    % No new DCC defined yet. Using this would lead to incorrect results. 
     OnionFiles.Center= [-60.9250 89.2770 91.1510];
 end
 result.OnionFiles=OnionFiles;

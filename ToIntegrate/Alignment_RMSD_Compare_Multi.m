@@ -45,13 +45,13 @@ end
 
 % Comupte Alignment RMSD for original alignment
 if BA
-    RMSD_Orig.BA=Alignment_RMSD(RVlab_B,RVlab_A,NumberingStruct,FA);
+    RMSD_Orig.BA=Alignment_RMSD(RVlab_B,RVlab_A,RVlab_E,FA);
 end
 if AE
-    RMSD_Orig.AE=Alignment_RMSD(RVlab_A,RVlab_E,NumberingStruct,FA);
+    RMSD_Orig.AE=Alignment_RMSD(RVlab_A,RVlab_E,RVlab_B,FA);
 end
 if BE
-    RMSD_Orig.BE=Alignment_RMSD(RVlab_B,RVlab_E,NumberingStruct,FA);
+    RMSD_Orig.BE=Alignment_RMSD(RVlab_B,RVlab_E,RVlab_A,FA);
 end
 
 
@@ -68,13 +68,13 @@ end
 
 % Comupte Alignment RMSD for second alignment
 if BA
-    RMSD_Second.BA=Alignment_RMSD(RVlab_B,RVlab_A,NumberingStruct,SA);
+    RMSD_Second.BA=Alignment_RMSD(RVlab_B,RVlab_A,RVlab_E,SA);
 end
 if AE
-    RMSD_Second.AE=Alignment_RMSD(RVlab_A,RVlab_E,NumberingStruct,SA);
+    RMSD_Second.AE=Alignment_RMSD(RVlab_A,RVlab_E,RVlab_B,SA);
 end
 if BE
-    RMSD_Second.BE=Alignment_RMSD(RVlab_B,RVlab_E,NumberingStruct,SA);
+    RMSD_Second.BE=Alignment_RMSD(RVlab_B,RVlab_E,RVlab_A,SA);
 end
 
 
@@ -95,16 +95,16 @@ end
 figure();
 hold on;
 if BA
-    plot(RMSD_Orig.BA.x.renumber,RMSD_Orig.BA.RMSD.renumber,'r');
-    plot(RMSD_Second.BA.x.renumber,RMSD_Second.BA.RMSD.renumber,'k--');
+    plot(RMSD_Orig.BA.x.Species1,RMSD_Orig.BA.RMSD.renumber,'r');
+    plot(RMSD_Second.BA.x.Species1,RMSD_Second.BA.RMSD.renumber,'k--');
 end
 if AE
-    plot(RMSD_Orig.AE.x.renumber,RMSD_Orig.AE.RMSD.renumber,'b');
-    plot(RMSD_Second.AE.x.renumber,RMSD_Second.AE.RMSD.renumber,'c--');
+    plot(RMSD_Orig.AE.x.Species3,RMSD_Orig.AE.RMSD.renumber,'b');
+    plot(RMSD_Second.AE.x.Species3,RMSD_Second.AE.RMSD.renumber,'c--');
 end
 if BE
-    plot(RMSD_Orig.BE.x.renumber,RMSD_Orig.BE.RMSD.renumber,'g');
-    plot(RMSD_Second.BE.x.renumber,RMSD_Second.BE.RMSD.renumber,'y--');
+    plot(RMSD_Orig.BE.x.Species1,RMSD_Orig.BE.RMSD.renumber,'g');
+    plot(RMSD_Second.BE.x.Species1,RMSD_Second.BE.RMSD.renumber,'y--');
 end
 hold off;
 
