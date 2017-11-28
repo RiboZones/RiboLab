@@ -140,9 +140,11 @@ for ii = II
                 cifdat(end).val    = strLine{2,2};
                 cifdat(end).type   = strLine{1,2};
             else
-                cifdat(end+1).name = strLine{2,1};
-                cifdat(end).val    = '';
                 %warning('Wrong stuff comes after a variable in line: %d, %s',ii,strLine{2,1});
+                cifdat(end+1).name = strLine{2,1};
+                %cifdat(end).val    = '';
+                cifdat(end).val    = strout{ii+1}{2};
+                % Hope this change is ok. 
             end
             
         case 'number'
