@@ -249,7 +249,7 @@ if ~isequal(FileName,0) && ~isequal(PathName,0)
     set(handles.output,'UserData',result);
    
     numCads=length(RiboLabCads);
-    CadsTable=cell(numCads,3);
+    CadsTable=cell(numCads,5);
     subunit='';
     for i =1:numCads
         CadsTable{i,1}=RiboLabCads(i).Name;
@@ -331,18 +331,18 @@ ProteinMenu=[];
 
 numCads=length(RiboLabCads);
 for i=1:numCads
-    if strcmp(CadsTable(i,2),'rRNA')
+    if strcmp(CadsTable(i,3),'rRNA')
         RiboLabCads_rRNA=[RiboLabCads_rRNA,RiboLabCads(i)];
-        RiboLabCads_rRNA_Names=[RiboLabCads_rRNA_Names,CadsTable{i,3}];
-        rRNA_Chains=[rRNA_Chains,';',CadsTable{i,4}];
-    elseif strcmp(CadsTable(i,2),'rProtein')
+        RiboLabCads_rRNA_Names=[RiboLabCads_rRNA_Names,CadsTable{i,4}];
+        rRNA_Chains=[rRNA_Chains,';',CadsTable{i,5}];
+    elseif strcmp(CadsTable(i,3),'rProtein')
         RiboLabCads_rProtein=[RiboLabCads_rProtein,RiboLabCads(i)];
-        RiboLabCads_rProtein_Names=[RiboLabCads_rProtein_Names,CadsTable{i,3}];
-        rProtein_Chains=[rProtein_Chains,';',CadsTable{i,4}];
-        ProteinMenu=[ProteinMenu;{[CadsTable{i,3},':',CadsTable{i,3},':',CadsTable{i,4}]}];
+        RiboLabCads_rProtein_Names=[RiboLabCads_rProtein_Names,CadsTable{i,4}];
+        rProtein_Chains=[rProtein_Chains,';',CadsTable{i,5}];
+        ProteinMenu=[ProteinMenu;{[CadsTable{i,3},':',CadsTable{i,4},':',CadsTable{i,5}]}];
     end
-    MoleculeChainMap.(['mol_',CadsTable{i,3}])=CadsTable{i,4};
-    ChainMoleculeMap.(['chain_',CadsTable{i,4}])=CadsTable{i,3};
+    MoleculeChainMap.(['mol_',CadsTable{i,4}])=CadsTable{i,5};
+    ChainMoleculeMap.(['chain_',CadsTable{i,5}])=CadsTable{i,4};
 end
 result.rRNA_Chains=rRNA_Chains;
 result.rProtein_Chains=rProtein_Chains;
