@@ -54,9 +54,9 @@ classdef PDBentry < handle
                             
                         case '.cif'
                             cif_obj=cif(file);
-                            %pdb_obj.CIF=cif_obj.cifdat;
-                            pdb=cif2pdb(cif_obj,pdb_obj);
-                            
+                            pdb=cif2pdb(cif_obj);
+                            pdb_obj.CIF=cif_obj.cifdat;
+                            pdb_obj.ID=pdb_obj.CIF(1).val;
                     end
                     save([newID,'.mat'],'pdb','-v7')
                 end
@@ -66,7 +66,7 @@ classdef PDBentry < handle
                     save([newID,'.mat'],'pdb','-v7');
                 end
                 pdb_obj.PDB=pdb;
-                pdb_obj.ID=newID;
+                
                 if gui
                     delete(h)
                 end
@@ -100,10 +100,15 @@ classdef PDBentry < handle
             end
             resiCode={pdb_obj.PDB.Model.Atom.iCode}';
             altLoc={pdb_obj.PDB.Model.Atom.altLoc}';
-            pdb_obj.UniqueResSeq=strcat(reschain,'_',resnum,resiCode);
+            pdb_obj.UniqueResSeq=strcat(reschain,'_',resnum,resiCode,altLoc);
             pdb_obj.ChainID=reschain;
             pdb_obj.AtomSerNo=[pdb_obj.PDB.Model.Atom.AtomSerNo]';
             pdb_obj.UniqueAtomNames=strcat(reschain,'_',strtrim(resnum),resiCode,'_',{pdb_obj.PDB.Model.Atom.AtomName}',regexprep(altLoc,'.','_$0'));
+            %Sort to handle residues with altnerating altLoc
+            [pdb_obj.UniqueResSeq,I]=sort(pdb_obj.UniqueResSeq);
+            pdb_obj.ChainID=pdb_obj.ChainID(I);
+            pdb_obj.AtomSerNo=pdb_obj.AtomSerNo(I);
+            pdb_obj.UniqueAtomNames=pdb_obj.UniqueAtomNames(I);
         end
         
         function NewPDBentry=SubsetbyName(pdb_obj,subset_names,varargin)
