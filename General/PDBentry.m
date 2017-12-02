@@ -56,7 +56,7 @@ classdef PDBentry < handle
                             cif_obj=cif(file);
                             pdb=cif2pdb(cif_obj);
                             pdb_obj.CIF=cif_obj.cifdat;
-                            pdb_obj.ID=pdb_obj.CIF(1).val;
+                            pdb.ID=pdb_obj.CIF(1).val;
                     end
                     save([newID,'.mat'],'pdb','-v7')
                 end
@@ -66,7 +66,7 @@ classdef PDBentry < handle
                     save([newID,'.mat'],'pdb','-v7');
                 end
                 pdb_obj.PDB=pdb;
-                
+                pdb_obj.ID=pdb.ID;
                 if gui
                     delete(h)
                 end
