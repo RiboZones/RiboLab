@@ -18,6 +18,8 @@ if nargin > 1
                 MyMap=varargin{2*ind};
             case 'ItemList'
                 ItemList=varargin{2*ind};
+            case 'ItemList2'
+                ItemList2=varargin{2*ind};
             case 'ProteinCol'
                 Protein_Col=varargin{2*ind};
             case 'Merge'
@@ -282,8 +284,8 @@ switch TableFormat
                 Keep = (I1~=0) & (I2~=0);
                 numLines=sum(Keep);
                 %tables{i}(1:numLines,1)=strtrim(cellstr(num2str((1:numLines)')));
-                tables{i}(1:numLines,1)=strtrim(cellstr(num2str(I1(Keep)-1)));
-                tables{i}(1:numLines,2)=strtrim(cellstr(num2str(I2(Keep)-1)));
+                tables{i}(1:numLines,1)=ItemList2(I1(Keep));
+                tables{i}(1:numLines,2)=ItemList2(I2(Keep));
                 tables{i}(1:numLines,3)={BP(i).Data(Keep).BP_Type};
                 
                 if iscell(BP(i).Name)

@@ -343,11 +343,13 @@ for i=1:numCads
     end
     MoleculeChainMap.(['mol_',CadsTable{i,4}])=CadsTable{i,5};
     ChainMoleculeMap.(['chain_',CadsTable{i,5}])=CadsTable{i,4};
+    MoleculeGroupMap.(['mol_',CadsTable{i,4}])=CadsTable{i,2};
 end
 result.rRNA_Chains=rRNA_Chains;
 result.rProtein_Chains=rProtein_Chains;
 result.MoleculeChainMap=MoleculeChainMap;
 result.ChainMoleculeMap=ChainMoleculeMap;
+result.MoleculeGroupMap=MoleculeGroupMap;
 result.RiboLabCads_rProtein_Names=RiboLabCads_rProtein_Names;
 result.RiboLabCads_rRNA_Names=RiboLabCads_rRNA_Names;
 result.ProteinMenu=ProteinMenu;
@@ -417,7 +419,7 @@ if get(handles.FR3D_InteractionsBox,'value')
     BPorg=BPorganize([FilteredBP{:}]);
     BPorg(5)=[]; % Remove other type
     DeDupped_BPs=DeDupBP(BPorg);
-    FR3D_Interaction_Tables=BP2Table(DeDupped_BPs,'TableFormat','website2','ItemList',RiboLabMap.ItemNames,'Merge',false);
+    FR3D_Interaction_Tables=BP2Table(DeDupped_BPs,'TableFormat','website2','ItemList',RiboLabMap.ItemNames,'ItemList2',ResidueList,'Merge',false);
     result.FR3D_Interaction_Tables=FR3D_Interaction_Tables;
 end
 if get(handles.EntropyBox,'value') || get(handles.CoVarEntropyBox,'value')
@@ -554,55 +556,64 @@ if length(split_name) < 2
     split_name{2}='';
 end
 Table=[Table,repmat(split_name,length(Table),1)];
-TableHeader={};
-Table_SD={};
-if get(handles.DomainDefbox,'value')
-    Table_SD=[Table_SD,result.Domain_Table(:,2:4)];
-    TableHeader=[TableHeader,{'Domain_RN','Domain_AN','Domains_Color'}];
-end
-if get(handles.helixDefBox,'value')
-    Table_SD=[Table_SD,result.Helix_Table(:,2:3)];
-    TableHeader=[TableHeader,{'Helix_Num','Helix_Color'}];
-end
-if get(handles.fineOnionBox,'value')
-    Table_SD=[Table_SD,result.Fine_Onion_Table(:,2)];
-    TableHeader=[TableHeader,{'FineOnion'}];
-end
-if get(handles.coarseOnionBox,'value')
-    Table_SD=[Table_SD,result.Coarse_Onion_Table(:,2)];
-    TableHeader=[TableHeader,{'Onion'}];
-end
-if get(handles.meanBFactBox,'value')
-    Table_SD=[Table_SD,result.Thermal_Factor_Table(:,2)];
-    TableHeader=[TableHeader,{'mean_tempFactor'}];
-end
-if get(handles.EntropyBox,'value')
-    Table_SD=[Table_SD,result.Entropy_Table(:,2)];
-    TableHeader=[TableHeader,{'Shannon_Entropy'}];
-end
-if get(handles.CoVarEntropyBox,'value')
-    Table_SD=[Table_SD,result.CoVarEntropy_Table(:,2)];
-    TableHeader=[TableHeader,{'CoVar_Entropy'}];
-end
-if get(handles.ProteinContactsBox,'value')
-    Table_SD=[Table_SD,result.Protein_Contact_Table(:,2:end)];
-    TableHeader=[TableHeader,[result.RiboLabCads_rProtein_Names]];
-end
-if get(handles.MagContactsBox,'value')
-    d=[result.Mg_Individual_Contact_Table{:}];
-    numMgCols=length(result.Mg_Individual_Contact_Table);
-    e=[d{:}];
-    Table_SD=[Table_SD,e(:,2:2:2*numMgCols)];
-    TableHeader=[TableHeader,[result.MgColNames]];
-end
-
 [DataSetName_path]=fileparts(result.File);
 writetable(cell2table(Table,'VariableNames',{'map_Index','molName','resNum','unModeResName','modResName','X','Y','Species_Abr','AltForm'}), [DataSetName_path,...
     '\',get(handles.DataSetName,'String'),'_SecondaryStructures','.csv'] );
 
-if ~isempty(Table_SD)
-    writetable(cell2table(Table_SD,'VariableNames',TableHeader(1,:)), [DataSetName_path,...
-    '\',get(handles.DataSetName,'String'),'_StructuralData','.csv'] );
+
+TableHeader={};
+Table_SD2={};
+if get(handles.DomainDefbox,'value')
+    Table_SD2=[Table_SD2,result.Domain_Table(:,2:4)];
+    %TableHeader=[TableHeader,{'Domain_RN','Domain_AN','Domains_Color'}];
+end
+if get(handles.helixDefBox,'value')
+    Table_SD2=[Table_SD2,result.Helix_Table(:,2:3)];
+    %TableHeader=[TableHeader,{'Helix_Num','Helix_Color'}];
+end
+if ~isempty(Table_SD2)
+    writetable(cell2table(Table_SD2), [DataSetName_path,...
+    '\',get(handles.DataSetName,'String'),'_StructuralData2','.csv']);
+end
+
+Table_SD3={};
+if get(handles.fineOnionBox,'value')
+    Table_SD3=[Table_SD3,result.Fine_Onion_Table(:,2)];
+    TableHeader=[TableHeader,{'FineOnion'}];
+end
+if get(handles.coarseOnionBox,'value')
+    Table_SD3=[Table_SD3,result.Coarse_Onion_Table(:,2)];
+    TableHeader=[TableHeader,{'Onion'}];
+end
+if get(handles.meanBFactBox,'value')
+    Table_SD3=[Table_SD3,result.Thermal_Factor_Table(:,2)];
+    TableHeader=[TableHeader,{'mean_tempFactor'}];
+end
+
+if get(handles.EntropyBox,'value')
+    Table_SD3=[Table_SD3,result.Entropy_Table(:,2)];
+    TableHeader=[TableHeader,{'Shannon_Entropy'}];
+end
+if get(handles.CoVarEntropyBox,'value')
+    Table_SD3=[Table_SD3,result.CoVarEntropy_Table(:,2)];
+    TableHeader=[TableHeader,{'CoVar_Entropy'}];
+end
+if get(handles.ProteinContactsBox,'value')
+    %Table_SD3=[Table_SD3,result.Protein_Contact_Table(:,2:end)];
+    %TableHeader=[TableHeader,[result.RiboLabCads_rProtein_Names]];
+end
+if get(handles.MagContactsBox,'value')
+   % d=[result.Mg_Individual_Contact_Table{:}];
+    %numMgCols=length(result.Mg_Individual_Contact_Table);
+   % e=[d{:}];
+   % Table_SD3=[Table_SD3,e(:,2:2:2*numMgCols)];
+   % TableHeader=[TableHeader,[result.MgColNames]];
+end
+
+
+if ~isempty(Table_SD3)
+    writetable(cell2table(Table_SD3,'VariableNames',TableHeader(1,:)), [DataSetName_path,...
+    '\',get(handles.DataSetName,'String'),'_StructuralData3','.csv'] );
 end
 
 % xlswrite([DataSetName_path,'\',get(handles.DataSetName,'String'),'.xlsx'],vertcat(TableHeader,Table));
@@ -623,7 +634,7 @@ if get(handles.MagInteractionBox,'value')
     
 end
 if get(handles.FR3D_InteractionsBox,'value')
-    NN={'resIndex1','resIndex2','bp_type','bp_group','StructureName'};
+    NN={'residue_i','residue_j','bp_type','bp_group','StructureName'};
     %for i=1:length(Names)
     writetable(cell2table([result.FR3D_Interaction_Tables,cellstr(repmat(result.RiboLabPDBs(1).ID,...
         length(result.FR3D_Interaction_Tables),1))],'VariableNames',NN), [DataSetName_path,...

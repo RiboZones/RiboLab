@@ -66,7 +66,11 @@ classdef PDBentry < handle
                     save([newID,'.mat'],'pdb','-v7');
                 end
                 pdb_obj.PDB=pdb;
-                pdb_obj.ID=pdb.ID;
+                if(isfield(pdb,'ID'))
+                     pdb_obj.ID=pdb.ID;
+                else
+                   pdb_obj.ID = newID;
+                end
                 if gui
                     delete(h)
                 end
@@ -85,7 +89,7 @@ classdef PDBentry < handle
         
         function Process(pdb_obj,het)
             if nargin == 1 || het
-                if isfield(pdb_obj.PDB.Model,'HeterogenAtom') && length(pdb_obj.PDB.Model.HeterogenAtom) && ~isempty(pdb_obj.PDB.Model.HeterogenAtom(1).AtomSerNo)                 
+                if isfield(pdb_obj.PDB.Model,'HeterogenAtom') && ~isempty(pdb_obj.PDB.Model.HeterogenAtom) && ~isempty(pdb_obj.PDB.Model.HeterogenAtom(1).AtomSerNo)                 
                     % If HeterogenAtoms are found in the pdb structure, include them
                     pdb_obj.PDB.Model.Atom=[pdb_obj.PDB.Model.Atom pdb_obj.PDB.Model.HeterogenAtom];
                     pdb_obj.PDB.Model=rmfield(pdb_obj.PDB.Model,'HeterogenAtom');

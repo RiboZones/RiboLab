@@ -9,11 +9,12 @@ MergeSingles=true;
 ScaleFactor=2;
 RemoveUnProcessed=false;
 FreqFilterMode=false;
-F_cutoff = 0.95;
+F_cutoff = 0.501;
 TwoColorMode=false;
 SecondColor='green';
 SwitchPoint=0;
 DataSetName=[RV_Lab_Structs(1).RiboLabMap.Name,'_CoVarEntropy'];
+SimpleMerge=false;
 
 if nargin > 1
     for ind=1:length(varargin)/2
@@ -44,6 +45,8 @@ if nargin > 1
                 SwitchPoint=varargin{2*ind};
              case 'Name'
                 DataSetName=varargin{2*ind};
+            case 'SimpleMerge'
+                SimpleMerge=varargin{2*ind};
         end
     end
 end
@@ -65,8 +68,13 @@ for jjj=1:length(RV_Lab_Structs)
 
         H=H(1:lenSeq);
         Hadj=zeros(1,lenSeq);
-        Hadj(H_CoVar{1} < 0) = H(H_CoVar{1} < 0);
-        Hadj(H_CoVar{1} > 0) = ScaleFactor * H_CoVar{1}(H_CoVar{1} > 0);
+        if SimpleMerge
+            Hadj(H_CoVar{1} < 0) = H(H_CoVar{1} < 0);
+            Hadj(H_CoVar{1} > 0) = ScaleFactor * H_CoVar{1}(H_CoVar{1} > 0);
+        else
+            Hadj=H;
+            Hadj(H_CoVar{1} >= 0) = min([H(H_CoVar{1} >= 0); ScaleFactor * H_CoVar{1}(H_CoVar{1} >= 0)]);
+        end
     else
         Hadj=H_CoVar{1};
     end

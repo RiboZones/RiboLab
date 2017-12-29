@@ -1,12 +1,14 @@
-function [ H_CoVar, F_CoVar,MostFreqBasePair,Dyads ] = CoVarEntropy( Alignment, BPTables, BP_Types_Filter, CoVarMode, varargin )
+function [ H_CoVar, F_CoVar,MostFreqBasePair,Dyads ] = CoVarEntropy( Alignment, BP, BP_Types_Filter, CoVarMode, varargin )
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
 %Assumes dedupped tables.
 
-BasePairClasses={{'CG','GC','AU','UA','GA','AG','GU','UG','AC','CA','UU','UC','CU'}};
+%BasePairClasses={{'CG','GC','AU','UA','GA','AG','GU','UG','AC','CA','UU','UC','CU'}};
+BasePairClasses={{'CG','GC','AU','UA','GU','UG'}};
+
 AllPairs={'AA','AC','AG','AU','CA','CC','CG','CU','GA','GC','GG','GU','UA','UC','UG','UU'};
-FreqCutoff=0.95;
+FreqCutoff=0.50;
 CombineSymmetry=false;
 
 if nargin > 4
@@ -29,8 +31,7 @@ F_CoVar=cell(1,1);
 MostFreqBasePair=cell(1,1);
 numClasses=length(BasePairClasses);
 
-BP=vertcat(BPTables{:});
-BP_types=BP(:,4);
+BP_types=BP(:,3);
 [~,I]=ismember(lower(BP_types),lower(BP_Types_Filter));
 H_CoVar{1}=zeros(1,length(Alignment(1).Sequence));
 F_CoVar{1}=cell(1,length(Alignment(1).Sequence));
@@ -38,24 +39,24 @@ MostFreqBasePair{1}=repmat({{''}},[1,length(Alignment(1).Sequence)]);
 
 switch CoVarMode
     case 'isBasePaired'
-        if length(sort(str2double(vertcat(BP(logical(I),2),BP(logical(I),3))))) ~= ...
-                length(unique(str2double(vertcat(BP(logical(I),2),BP(logical(I),3)))))
+        if length(sort(str2double(vertcat(BP(logical(I),1),BP(logical(I),2))))) ~= ...
+                length(unique(str2double(vertcat(BP(logical(I),1),BP(logical(I),2)))))
             error('Duplications found!');
         end
-        H_CoVar{1}(unique(str2double(vertcat(BP(logical(I),2),BP(logical(I),3)))) + 1)=1; % +1 is because MATLAB uses 1 indexing, not 0-indexing.
+        H_CoVar{1}(unique(str2double(vertcat(BP(logical(I),1),BP(logical(I),2)))) + 1)=1; % +1 is because MATLAB uses 1 indexing, not 0-indexing.
     case 'SimpleDifferenceEntropy'
         ConservationProfile=seqprofile(Alignment,'Alphabet','NT','Gaps','all')';
         ConservationProfile_Comp=ConservationProfile(:,[4,3,2,1,5]);
-        BasePairedRes_i=str2double(BP(logical(I),2)) + 1;
-        BasePairedRes_j=str2double(BP(logical(I),3)) + 1;
+        BasePairedRes_i=str2double(BP(logical(I),1)) + 1;
+        BasePairedRes_j=str2double(BP(logical(I),2)) + 1;
         DeltaFreq=abs(ConservationProfile(BasePairedRes_i,:)-ConservationProfile_Comp(BasePairedRes_j,:));
         H_CoVar{1}=H_CoVar{1} - 1;
         H_CoVar{1}(BasePairedRes_i)=sum(DeltaFreq,2);
         H_CoVar{1}(BasePairedRes_j)=sum(DeltaFreq,2);
     case 'DyadEntropy'
         Seqs=vertcat(Alignment.Sequence);
-        BasePairedRes_i=str2double(BP(logical(I),2)) + 1;
-        BasePairedRes_j=str2double(BP(logical(I),3)) + 1;
+        BasePairedRes_i=str2double(BP(logical(I),1)) + 1;
+        BasePairedRes_j=str2double(BP(logical(I),2)) + 1;
         Dyads(:,:,1)=Seqs(:,BasePairedRes_i);
         Dyads(:,:,2)=Seqs(:,BasePairedRes_j);
         H_CoVar{1}=H_CoVar{1} - 1;
@@ -85,8 +86,8 @@ switch CoVarMode
         end
     case 'ByTypes'
         Seqs=vertcat(Alignment.Sequence);
-        BasePairedRes_i=str2double(BP(logical(I),2)) + 1;
-        BasePairedRes_j=str2double(BP(logical(I),3)) + 1;
+        BasePairedRes_i=str2double(BP(logical(I),1)) + 1;
+        BasePairedRes_j=str2double(BP(logical(I),2)) + 1;
         %Ignore BasePairedRes's with indices past the alignment. These will
         %typically be 5S, because I don't have 5S in my alignments yet.
         keep=BasePairedRes_i < size(Seqs,2) & BasePairedRes_j < size(Seqs,2);
@@ -131,8 +132,8 @@ switch CoVarMode
             Seqs=vertcat(Alignment.Sequence); %Get the sequences
         end
         
-        BasePairedRes_i=str2double(BP(logical(I),2)) + 1; % Get paired indices
-        BasePairedRes_j=str2double(BP(logical(I),3)) + 1;
+        BasePairedRes_i=str2double(BP(logical(I),1)) + 1; % Get paired indices
+        BasePairedRes_j=str2double(BP(logical(I),2)) + 1;
         Dyads(:,:,1)=Seqs(:,BasePairedRes_i); %Prepare variable to hold all basepairs
         Dyads(:,:,2)=Seqs(:,BasePairedRes_j);
         H_CoVar{1}=H_CoVar{1} - 1; % Start from negative one, so that singles stay -1.
@@ -163,8 +164,8 @@ switch CoVarMode
         
     case 'FrequencyByType'
         Seqs=vertcat(Alignment.Sequence);
-        BasePairedRes_i=str2double(BP(logical(I),2)) + 1;
-        BasePairedRes_j=str2double(BP(logical(I),3)) + 1;
+        BasePairedRes_i=str2double(BP(logical(I),1)) + 1;
+        BasePairedRes_j=str2double(BP(logical(I),2)) + 1;
         Dyads(:,:,1)=Seqs(:,BasePairedRes_i);
         Dyads(:,:,2)=Seqs(:,BasePairedRes_j);
         H_CoVar{1}=H_CoVar{1} - 1;
