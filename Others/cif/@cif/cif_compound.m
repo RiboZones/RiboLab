@@ -23,8 +23,11 @@ compound=cell(3*numIDs,1);
 
 for i=1:numIDs
     
-    
-    I=ismember(label_entity_id,entity_id{i});
+    try 
+        I=ismember(label_entity_id,entity_id{i});
+    catch
+        I=1;
+    end
     x=unique(label_asym_id(I));
     if isnumeric(assembly)
         if iscell(asym_id_list)

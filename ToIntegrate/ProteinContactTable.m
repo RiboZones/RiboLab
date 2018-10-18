@@ -84,6 +84,38 @@ for i=1:numPDBs
                         Protein_Contact_Table{j}(III,i+1)=num2cell(ones(length(r(II)),1));
                     end
                 end
+            case 'website2'
+                Protein_Contact_Table{j}(:,1)=myMap(j).ItemNames';
+                %Protein_Contact_Table{j}(:,i+1)=num2cell(zeros(length(myMap(j).ItemNames),1));
+                if Magnesium_mode
+                    if Combine_Cols
+                        aa=num2cell(zeros(length(myMap(j).ItemNames),1));
+                        if ~isempty(II)
+                            %aa(III,1)=num2cell(2*ones(length(r(II)),1));
+                            %No longer need the 2.
+                            aa(III,1)=num2cell(ones(length(r(II)),1));
+                        end
+                        if i == 1
+                            Protein_Contact_Table{j}(:,2)=aa;
+                        else
+                            newcol=logical(cell2mat(aa));
+                            oldcol=logical(cell2mat(Protein_Contact_Table{j}(:,2)));
+                            updatecol=newcol & ~oldcol;
+                            Protein_Contact_Table{j}(updatecol,2)=aa(updatecol);
+                        end
+                        
+                    else
+                        Protein_Contact_Table{j}(:,i+1)=num2cell(zeros(length(myMap(j).ItemNames),1));
+                        if sum(III>0)
+                            Protein_Contact_Table{j}(III,i+1)=num2cell(2*ones(length(r(II)),1));
+                        end
+                    end
+                else
+                    Protein_Contact_Table{j}(:,i+1)=num2cell(zeros(length(myMap(j).ItemNames),1));
+                    if sum(III>0)
+                        Protein_Contact_Table{j}(III,i+1)=num2cell(ones(length(r(II)),1));
+                    end
+                end
             case 'paper'
                 Protein_Contact_Table{j}(:,1)=r;
                 CADS_obj(i).Results(j).FilteredMap(1).Y

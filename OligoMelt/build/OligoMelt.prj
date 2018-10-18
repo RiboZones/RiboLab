@@ -1,0 +1,113 @@
+<deployment-project plugin="plugin.apptool" plugin-version="1.0">
+  <configuration build-checksum="3981302505" file="C:\Users\anton.SUPERSATURNVIII\Dropbox (GaTech)\Oligomelt\OligoMelt.prj" location="C:\Users\anton.SUPERSATURNVIII\Dropbox (GaTech)\Oligomelt" name="OligoMelt" target="target.mlapps" target-name="Package App">
+    <param.appname>OligoMelt</param.appname>
+    <param.authnamewatermark>Chad R. Bernier</param.authnamewatermark>
+    <param.email>RiboZones@gmail.com</param.email>
+    <param.company>Georgia Institute of Technology</param.company>
+    <param.icon />
+    <param.icons />
+    <param.summary />
+    <param.description />
+    <param.screenshot />
+    <param.version>1.2</param.version>
+    <param.products.name />
+    <param.products.id />
+    <param.products.version />
+    <param.platforms />
+    <param.output>C:\Users\anton.SUPERSATURNVIII\Dropbox (GaTech)\Oligomelt</param.output>
+    <param.guid>a6ee14df-87d7-43c7-a4b8-5a1d35d297ae</param.guid>
+    <unset>
+      <param.icon />
+      <param.icons />
+      <param.summary />
+      <param.description />
+      <param.screenshot />
+      <param.products.name />
+      <param.products.id />
+      <param.products.version />
+      <param.platforms />
+      <param.output />
+    </unset>
+    <fileset.main>
+      <file>C:\RiboVision_MASTER\GITs\RiboLab\OligoMelt\OligoMeltGUI.m</file>
+    </fileset.main>
+    <fileset.depfun>
+      <file>C:\RiboVision_MASTER\GITs\RiboLab\General\ErrorBoxGUI.fig</file>
+      <file>C:\RiboVision_MASTER\GITs\RiboLab\General\ErrorBoxGUI.m</file>
+      <file>C:\RiboVision_MASTER\GITs\RiboLab\OligoMelt\@AboutOligoMelt\AboutOligoMelt.fig</file>
+      <file>C:\RiboVision_MASTER\GITs\RiboLab\OligoMelt\@AboutOligoMelt\AboutOligoMelt.m</file>
+      <file>C:\RiboVision_MASTER\GITs\RiboLab\OligoMelt\@Curve\Curve.m</file>
+      <file>C:\RiboVision_MASTER\GITs\RiboLab\OligoMelt\@Instructions\Instructions.fig</file>
+      <file>C:\RiboVision_MASTER\GITs\RiboLab\OligoMelt\@Instructions\Instructions.m</file>
+      <file>C:\RiboVision_MASTER\GITs\RiboLab\OligoMelt\@OligoMeltSaveState\OligoMeltSaveState.m</file>
+      <file>C:\RiboVision_MASTER\GITs\RiboLab\OligoMelt\@OligoOutput\OligoOutput.m</file>
+      <file>C:\RiboVision_MASTER\GITs\RiboLab\OligoMelt\@Theta\Theta.m</file>
+      <file>C:\RiboVision_MASTER\GITs\RiboLab\OligoMelt\OligoMelt.m</file>
+      <file>C:\RiboVision_MASTER\GITs\RiboLab\OligoMelt\OligoMeltGUI.fig</file>
+    </fileset.depfun>
+    <fileset.resources>
+      <file>C:\Users\anton.SUPERSATURNVIII\Desktop\sample.xls</file>
+    </fileset.resources>
+    <fileset.package />
+    <build-deliverables>
+      <file location="C:\Users\anton.SUPERSATURNVIII\Dropbox (GaTech)" name="Oligomelt" optional="false">C:\Users\anton.SUPERSATURNVIII\Dropbox (GaTech)\Oligomelt</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>C:\Program Files\MATLAB\R2018a</root>
+      <toolboxes>
+        <toolbox name="fixedpoint" />
+        <toolbox name="matlabcoder" />
+        <toolbox name="matlabhdlcoder" />
+        <toolbox name="embeddedcoder" />
+        <toolbox name="gpucoder" />
+        <toolbox name="polyspacebugfinder" />
+      </toolboxes>
+      <toolbox>
+        <fixedpoint>
+          <enabled>true</enabled>
+        </fixedpoint>
+      </toolbox>
+      <toolbox>
+        <matlabcoder>
+          <enabled>true</enabled>
+        </matlabcoder>
+      </toolbox>
+      <toolbox>
+        <matlabhdlcoder>
+          <enabled>true</enabled>
+        </matlabhdlcoder>
+      </toolbox>
+      <toolbox>
+        <embeddedcoder>
+          <enabled>true</enabled>
+        </embeddedcoder>
+      </toolbox>
+      <toolbox>
+        <gpucoder>
+          <enabled>true</enabled>
+        </gpucoder>
+      </toolbox>
+      <toolbox>
+        <polyspacebugfinder>
+          <enabled>true</enabled>
+        </polyspacebugfinder>
+      </toolbox>
+    </matlab>
+    <platform>
+      <unix>false</unix>
+      <mac>false</mac>
+      <windows>true</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>false</linux>
+      <solaris>false</solaris>
+      <osver>10.0</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>win64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>

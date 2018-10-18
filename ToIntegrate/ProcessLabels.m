@@ -1,0 +1,69 @@
+function [Label_Table]=ProcessLabels(full_file,page_names)
+
+[file_path,file_name] = fileparts(full_file);
+Labels=ReadLabelsSVGsimple(full_file);
+Label_Table = TableLabels(Labels);
+Label_Table = AddSSTable(Label_Table,file_name,page_names);
+
+writetable(cell2table(Label_Table.Text,'VariableNames',{'LabelText','X','Y',...
+    'Font','FontSize','Fill','SS_Table'}), [fullfile(file_path,file_name),'_TextLabels.csv'] );
+writetable(cell2table(Label_Table.Line,'VariableNames',{'X1','Y1','X2','Y2',...
+    'Fill','Stroke','StrokeWidth','StrokeLineJoin','StrokeMiterLimit',...
+    'SS_Table'}), [fullfile(file_path,file_name),'_LineLabels.csv'] );
+end
+
+function [Label_Table,TextTable,LineTable]=TableLabels(All_Labels)
+All_Labels_Merge.Text=vertcat(All_Labels(:).Text);
+All_Labels_Merge.Line=vertcat(All_Labels(:).Line);
+
+numTextLabels=length(All_Labels_Merge.Text);
+TextTable=cell(numTextLabels,6);
+TextTable(:,1)={All_Labels_Merge.Text(:).LabelText};
+TextTable(:,2)={All_Labels_Merge.Text(:).X};
+TextTable(:,3)={All_Labels_Merge.Text(:).Y};
+TextTable(:,4)={All_Labels_Merge.Text(:).Font};
+TextTable(:,5)={All_Labels_Merge.Text(:).FontSize};
+TextTable(:,6)={All_Labels_Merge.Text(:).Fill};
+
+numLineLabels=length(All_Labels_Merge.Line);
+LineTable=cell(numLineLabels,9);
+LineTable(:,1)={All_Labels_Merge.Line(:).X1};
+LineTable(:,2)={All_Labels_Merge.Line(:).Y1};
+LineTable(:,3)={All_Labels_Merge.Line(:).X2};
+LineTable(:,4)={All_Labels_Merge.Line(:).Y2};
+LineTable(:,5)={All_Labels_Merge.Line(:).Fill};
+LineTable(:,6)={All_Labels_Merge.Line(:).Stroke};
+LineTable(:,7)={All_Labels_Merge.Line(:).Stroke_Width};
+LineTable(:,8)={All_Labels_Merge.Line(:).Stroke_Linejoin};
+LineTable(:,9)={All_Labels_Merge.Line(:).Stroke_Miterlimit};
+
+Label_Table.Text=TextTable;
+Label_Table.Line=LineTable;
+
+end
+
+function Label_Table = AddSSTable(Label_Table,file_name,page_names)
+% New logic to handle multiple page structures. Assume pages are 612 points
+% and that dataset is in points. 
+numText = size(Label_Table.Text,1);
+for i = 1:numText
+    pageno = ceil(Label_Table.Text{i,2}/612);
+    Label_Table.Text{i,7}=[file_name,'_',page_names{pageno}];
+    % Re scale labels to individual pages. RiboVision will deal with this. 
+    if pageno > 1
+         Label_Table.Text{i,2} =  Label_Table.Text{i,2} - 612 * (pageno - 1);
+    end
+end
+
+numLines = size(Label_Table.Line,1);
+for i = 1:numLines
+    pageno = ceil(Label_Table.Line{i,1}/612);
+    Label_Table.Line{i,10}=[file_name,'_',page_names{pageno}];
+    % Re scale labels to individual pages. RiboVision will deal with this. 
+    if pageno > 1
+         Label_Table.Line{i,1} =  Label_Table.Line{i,1} - 612 * (pageno - 1);
+         Label_Table.Line{i,3} =  Label_Table.Line{i,3} - 612 * (pageno - 1);
+    end
+end
+
+end

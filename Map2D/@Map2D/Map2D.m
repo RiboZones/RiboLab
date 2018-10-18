@@ -30,7 +30,7 @@ classdef Map2D < handle
         
         function AddMap(map_object,fullfilepath,varargin)
             height_fig=792;
-            FontSize='3.9';
+            map_object.FontSize='3.9';
             moleculeName='23S';
             
             if nargin > 1
@@ -41,7 +41,7 @@ classdef Map2D < handle
                         case 'DataPointNames'
                             DataPointNames=varargin{2*ind};
                         case 'FontSize'
-                            FontSize=varargin{2*ind};
+                            map_object.FontSize=varargin{2*ind};
                         case 'LetterGroup'
                             LetterGroup=varargin{2*ind};
                         case 'moleculeName'
@@ -56,7 +56,7 @@ classdef Map2D < handle
                     textfile=fileread(fullfilepath);
                     ParsedText=regexp(textfile,'(?<ItemName>[\d\w]+),(?<Letter>\w),(?<X>[^,]+),(?<Y>[^,\s]+)','names');
                     numTextLabels=length(ParsedText);
-                    Text_Labels_Struct=repmat(struct('ItemName','','LabelText','','X','','Y','','Font','MyriadPro-Regular','FontSize',num2str(FontSize),'FontColor',[0,0,0],'Fill','#000000'),numTextLabels,1);
+                    Text_Labels_Struct=repmat(struct('ItemName','','LabelText','','X','','Y','','Font','MyriadPro-Regular','FontSize',num2str(map_object.FontSize),'FontColor',[0,0,0],'Fill','#000000'),numTextLabels,1);
                     
                     for i=1:numTextLabels
                         Text_Labels_Struct(i).Matrix=[1,0,0,1,str2double(ParsedText(i).X),str2double(ParsedText(i).Y)];
@@ -70,7 +70,7 @@ classdef Map2D < handle
                     textfile=fileread(fullfilepath);
                     ParsedText=regexp(textfile,'(?<Letter>[ACGUT]) (?<X>[^\s]+) (?<Y>[^\s]+)','names');
                     numTextLabels=length(ParsedText);
-                    Text_Labels_Struct=repmat(struct('ItemName','','LabelText','','X','','Y','','Font','MyriadPro-Regular','FontSize',num2str(FontSize),'FontColor',[0,0,0],'Fill','#000000'),numTextLabels,1);
+                    Text_Labels_Struct=repmat(struct('ItemName','','LabelText','','X','','Y','','Font','MyriadPro-Regular','FontSize',num2str(map_object.FontSize),'FontColor',[0,0,0],'Fill','#000000'),numTextLabels,1);
                     
                     if exist('DataPointNames','var') && ischar(DataPointNames) && exist(DataPointNames,'file')
                         textfile=fileread(DataPointNames);

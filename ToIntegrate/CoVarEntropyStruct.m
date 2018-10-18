@@ -4,7 +4,7 @@ function [ RV_Lab_Structs, H_CoVar, F_CoVar,Dyads ] = CoVarEntropyStruct( RV_Lab
 
 BP_Types={'cww'};
 CoVarMode='ByTypes';
-WriteToFile=true;
+WriteToFile=false;
 MergeSingles=true;
 ScaleFactor=2;
 RemoveUnProcessed=false;
@@ -103,7 +103,7 @@ for jjj=1:length(RV_Lab_Structs)
             RV_Lab_Structs(jjj).CoVarEntropy_Table{2,4}=SecondColor;
             RV_Lab_Structs(jjj).CoVarEntropy_Table{1,5}=SwitchPoint;
 
-            for j=1:size(RV_Lab_Structs(jjj).CoVarEntropy_Table,1);
+            for j=1:size(RV_Lab_Structs(jjj).CoVarEntropy_Table,1)
                 fprintf(fid, '%s,%s,%s,%s,%s\n',RV_Lab_Structs(jjj).CoVarEntropy_Table{j,1},...
                     num2str(RV_Lab_Structs(jjj).CoVarEntropy_Table{j,2}),...
                     RV_Lab_Structs(jjj).CoVarEntropy_Table{j,1},RV_Lab_Structs(jjj).CoVarEntropy_Table{j,4},...
@@ -111,7 +111,7 @@ for jjj=1:length(RV_Lab_Structs)
             end
         else
             fprintf(fid, '%s,%s,%s\n','resNum','DataCol','ModeBasePair');
-            for j=1:size(RV_Lab_Structs(jjj).CoVarEntropy_Table,1);
+            for j=1:size(RV_Lab_Structs(jjj).CoVarEntropy_Table,1)
                 fprintf(fid, '%s,%s,%s\n',RV_Lab_Structs(jjj).CoVarEntropy_Table{j,1},...
                     num2str(RV_Lab_Structs(jjj).CoVarEntropy_Table{j,2}),RV_Lab_Structs(jjj).CoVarEntropy_Table{j,3}{1});
             end

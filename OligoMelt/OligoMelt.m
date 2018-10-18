@@ -13,7 +13,14 @@ function [Results DataOut]=OligoMelt(file,DataSetIndex,Windows,...
 %  1. Step one
 try
     TxtDataSet=importdata(file);
-    IntrumentNameCheck=TxtDataSet.textdata{1};
+    if(isstruct(TxtDataSet.textdata))
+        txt_data = TxtDataSet.data.Sheet1;
+        text_data = TxtDataSet.textdata.Sheet1;
+    else
+        txt_data = TxtDataSet.data;
+        text_data = TxtDataSet.textdata;
+    end
+    IntrumentNameCheck=text_data{1};
     comma=findstr(IntrumentNameCheck,',');
     if ~isempty(comma)
         DataSetName=IntrumentNameCheck;
@@ -26,22 +33,22 @@ try
             Results=DataSetNames;
             return
         end
-        trimends=isnan(TxtDataSet.data(end,2:2:end));
+        trimends=isnan(txt_data(end,2:2:end));
         if sum(trimends)
-            TxtDataSet.data(end,:)=[];
+            txt_data(end,:)=[];
         end
-        Data=reshape(TxtDataSet.data,[],2,length(DataSetNames));
+        Data=reshape(txt_data,[],2,length(DataSetNames));
     else
-        if isempty(TxtDataSet.textdata{1})
-            DataSetNames={TxtDataSet.textdata{2:2:end}};
+        if isempty(text_data{1})
+            DataSetNames={text_data{2:2:end}};
         else
-            DataSetNames={TxtDataSet.textdata{1:2:end}};
+            DataSetNames={text_data{1:2:end}};
         end
         if nargin==1
             Results=DataSetNames;
             return
         end
-        numdata=TxtDataSet.data;
+        numdata=txt_data;
         ColsStartBlank=find(isnan(numdata(1,:)));
         lengthOfColumns=size(numdata,1);
         numCols=size(numdata,2);

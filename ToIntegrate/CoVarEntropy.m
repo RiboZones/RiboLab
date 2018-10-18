@@ -8,7 +8,7 @@ function [ H_CoVar, F_CoVar,MostFreqBasePair,Dyads ] = CoVarEntropy( Alignment, 
 BasePairClasses={{'CG','GC','AU','UA','GU','UG'}};
 
 AllPairs={'AA','AC','AG','AU','CA','CC','CG','CU','GA','GC','GG','GU','UA','UC','UG','UU'};
-FreqCutoff=0.50;
+FreqCutoff=0.501;
 CombineSymmetry=false;
 
 if nargin > 4
@@ -31,7 +31,10 @@ F_CoVar=cell(1,1);
 MostFreqBasePair=cell(1,1);
 numClasses=length(BasePairClasses);
 
-BP_types=BP(:,3);
+if iscell(BP)
+    BP=vertcat(BP{:});
+end
+BP_types=BP(:,4);
 [~,I]=ismember(lower(BP_types),lower(BP_Types_Filter));
 H_CoVar{1}=zeros(1,length(Alignment(1).Sequence));
 F_CoVar{1}=cell(1,length(Alignment(1).Sequence));
@@ -47,8 +50,8 @@ switch CoVarMode
     case 'SimpleDifferenceEntropy'
         ConservationProfile=seqprofile(Alignment,'Alphabet','NT','Gaps','all')';
         ConservationProfile_Comp=ConservationProfile(:,[4,3,2,1,5]);
-        BasePairedRes_i=str2double(BP(logical(I),1)) + 1;
-        BasePairedRes_j=str2double(BP(logical(I),2)) + 1;
+        BasePairedRes_i=str2double(BP(logical(I),2)) + 1;
+        BasePairedRes_j=str2double(BP(logical(I),3)) + 1;
         DeltaFreq=abs(ConservationProfile(BasePairedRes_i,:)-ConservationProfile_Comp(BasePairedRes_j,:));
         H_CoVar{1}=H_CoVar{1} - 1;
         H_CoVar{1}(BasePairedRes_i)=sum(DeltaFreq,2);
@@ -86,8 +89,8 @@ switch CoVarMode
         end
     case 'ByTypes'
         Seqs=vertcat(Alignment.Sequence);
-        BasePairedRes_i=str2double(BP(logical(I),1)) + 1;
-        BasePairedRes_j=str2double(BP(logical(I),2)) + 1;
+        BasePairedRes_i=str2double(BP(logical(I),2)) + 1;
+        BasePairedRes_j=str2double(BP(logical(I),3)) + 1;
         %Ignore BasePairedRes's with indices past the alignment. These will
         %typically be 5S, because I don't have 5S in my alignments yet.
         keep=BasePairedRes_i < size(Seqs,2) & BasePairedRes_j < size(Seqs,2);

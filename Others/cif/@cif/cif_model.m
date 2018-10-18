@@ -24,7 +24,8 @@ altLoc=cif_obj.subsref(struct('type','.','subs','atom_site.label_alt_id'));
 altLoc=regexprep(altLoc,'\.','');
 resName=cif_obj.subsref(struct('type','.','subs','atom_site.label_comp_id'));
 chainID=cif_obj.subsref(struct('type','.','subs','atom_site.auth_asym_id'));
-resSeq=str2doubleq(cif_obj.subsref(struct('type','.','subs','atom_site.auth_seq_id')));
+auth_seq_id=str2doubleq(cif_obj.subsref(struct('type','.','subs','atom_site.auth_seq_id')));
+label_seq_id=str2doubleq(cif_obj.subsref(struct('type','.','subs','atom_site.label_seq_id')));
 iCode=cif_obj.subsref(struct('type','.','subs','atom_site.pdbx_PDB_ins_code'));
 iCode=regexprep(iCode,'\?','');
 X=str2doubleq(cif_obj.subsref(struct('type','.','subs','atom_site.Cartn_x')));
@@ -47,7 +48,11 @@ for i=1:length(AtomSerNo)
             pdb_model_struct.Atom(numAtoms).altLoc=altLoc{i};
             pdb_model_struct.Atom(numAtoms).resName=resName{i};
             pdb_model_struct.Atom(numAtoms).chainID=chainID{i};
-            pdb_model_struct.Atom(numAtoms).resSeq=resSeq(i);
+            if isnan(auth_seq_id)
+                pdb_model_struct.Atom(numAtoms).resSeq=label_seq_id(i);
+            else
+                pdb_model_struct.Atom(numAtoms).resSeq=auth_seq_id(i);
+            end 
             pdb_model_struct.Atom(numAtoms).iCode=iCode{i};
             pdb_model_struct.Atom(numAtoms).X=X(i);
             pdb_model_struct.Atom(numAtoms).Y=Y(i);

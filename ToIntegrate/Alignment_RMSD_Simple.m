@@ -108,6 +108,8 @@ RMSD_Full2(ismember(item_names2,RL2(all_xtals)))=RMSD;
 
 RMSD_Aln.RL1=RL1;
 RMSD_Aln.RL2=RL2;
+RMSD_Aln.RMSD_Resi1=item_names1(ismember(item_names1,RL1(all_xtals)));
+RMSD_Aln.RMSD_Resi2=item_names2(ismember(item_names2,RL2(all_xtals)));
 RMSD_Aln.RMSD_Full1=RMSD_Full1;
 RMSD_Aln.RMSD_Full2=RMSD_Full2;
 RMSD_Aln.X=I1(all_xtals);
